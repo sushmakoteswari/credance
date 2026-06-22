@@ -2059,6 +2059,13 @@
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  /* Embedded in index.html — hide duplicate switcher, open correct edition */
+  if (window.parent !== window) {
+    document.querySelector('.switcher').style.display = 'none';
+    const hash = location.hash.replace('#', '');
+    if (['a', 'b', 'c', 'd'].includes(hash)) setCatalog(hash);
+  }
 </script>
 </body>
 </html>

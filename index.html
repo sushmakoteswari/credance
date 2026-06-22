@@ -1,55 +1,442 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La Maison — Four Catalog Editions</title>
+<title>La Maison — Interior Design Catalogs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://images.unsplash.com" crossorigin>
-<link rel="preconnect" href="https://images.pexels.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;500;600&family=Prata&family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: 'Inter', sans-serif;
-    background: #0a0a0a;
-    color: #f0ede6;
-    min-height: 100vh;
+  :root {
+    --terra: #c9a66b;
+    --terra-dark: #a8854f;
+    --terra-light: #ede0cc;
+    --charcoal: #1c1c1c;
+    --muted: #6e6e6e;
+    --bg: #f7f5f2;
+    --white: #ffffff;
+    --line: #e0dcd6;
+    --max: 1140px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* ── CATALOG SWITCHER ── */
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--charcoal);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  body.edition-luxury {
+    background: #0a0a0a;
+    color: #f0ede6;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* ── Edition switcher ── */
   .switcher {
-    position: sticky; top: 0; z-index: 200;
+    position: sticky; top: 0; z-index: 400;
     background: #080808;
     border-bottom: 0.5px solid #1a1a1a;
     padding: 14px 28px;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   }
   .switcher-label {
+    font-family: 'Inter', sans-serif;
     font-size: 10px; letter-spacing: 2.5px; color: #444;
     text-transform: uppercase; margin-right: 4px;
   }
   .cat-btn {
     display: flex; align-items: center; gap: 8px;
-    padding: 7px 18px;
+    padding: 7px 16px;
     border: 0.5px solid #2a2a2a;
     background: transparent; color: #666;
-    font-size: 10px; letter-spacing: 1.2px;
+    font-size: 10px; letter-spacing: 1px;
     cursor: pointer; font-family: 'Inter', sans-serif;
     text-transform: uppercase; transition: all 0.2s;
   }
   .cat-btn:hover { border-color: #555; color: #bbb; }
   .cat-btn.active { color: #fff; }
+  .cat-btn[data-cat="2030"].active { border-color: #c9a66b; color: #c9a66b; }
   .cat-btn[data-cat="a"].active { border-color: #b5c4a0; color: #b5c4a0; }
   .cat-btn[data-cat="b"].active { border-color: #5a6a7a; color: #5a6a7a; }
   .cat-btn[data-cat="c"].active { border-color: #c4785a; color: #c4785a; }
   .cat-btn[data-cat="d"].active { border-color: #b8963e; color: #b8963e; }
-  .cat-swatch { width: 10px; height: 10px; border-radius: 50%; }
+  .cat-btn[data-cat="e"].active { border-color: #2a5248; color: #6a9a88; }
+  .cat-swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
-  .catalog-wrap { display: none; }
-  .catalog-wrap.active { display: block; }
+  .edition-wrap { display: none; }
+  .edition-wrap.active { display: block; }
+  #luxury-root .catalog-wrap { display: none; }
+  #luxury-root .catalog-wrap.active { display: block; }
 
+  body.edition-arch {
+    background: #f5f0e8;
+    color: #1c1c1c;
+    font-family: 'Jost', sans-serif;
+  }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0;
+    background: linear-gradient(90deg, var(--terra), var(--terra-dark));
+    z-index: 300; transition: width 0.1s linear;
+  }
+
+  /* ── Side navigation ── */
+  .catalog-nav {
+    position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+    z-index: 250; display: flex; flex-direction: column; gap: 10px;
+  }
+  .catalog-nav a {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--line); border: none; cursor: pointer;
+    transition: transform 0.3s var(--ease), background 0.3s;
+    text-indent: -9999px; overflow: hidden;
+  }
+  .catalog-nav a:hover { transform: scale(1.3); background: var(--terra-light); }
+  .catalog-nav a.active { background: var(--terra); transform: scale(1.35); }
+
+  body.edition-arch .catalog-nav a { background: rgba(26,61,52,0.22); }
+  body.edition-arch .catalog-nav a:hover { background: rgba(26,61,52,0.5); }
+  body.edition-arch .catalog-nav a.active { background: #1a3d34; }
+
+  body.edition-luxury .catalog-nav a { background: rgba(0,0,0,0.18); }
+  body.edition-luxury .catalog-nav a:hover { background: rgba(0,0,0,0.35); }
+  body.edition-luxury .catalog-nav a.active { background: #8b7355; }
+
+  @media (max-width: 900px) {
+    .catalog-nav { display: none; }
+  }
+
+  /* ── 2030 catalog ── */
+  #cat-2030 {
+    max-width: var(--max);
+    margin: 0 auto 60px;
+    background: var(--white);
+    box-shadow: 0 0 60px rgba(0,0,0,0.06);
+  }
+
+  /* ── Spread base ── */
+  .spread {
+    position: relative;
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  /* ── Reveal animations ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition: opacity 0.85s var(--ease), transform 0.85s var(--ease);
+  }
+  .reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-48px);
+    transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  }
+  .reveal-left.is-visible { opacity: 1; transform: translateX(0); }
+
+  .terra-block {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.9s var(--ease);
+  }
+  .terra-block.is-visible { transform: scaleX(1); }
+
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  }
+  .stagger.is-visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: none; }
+  .stagger.is-visible > *:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: none; }
+  .stagger.is-visible > *:nth-child(3) { transition-delay: 0.25s; opacity: 1; transform: none; }
+  .stagger.is-visible > *:nth-child(4) { transition-delay: 0.35s; opacity: 1; transform: none; }
+  .stagger.is-visible > *:nth-child(5) { transition-delay: 0.45s; opacity: 1; transform: none; }
+  .stagger.is-visible > *:nth-child(6) { transition-delay: 0.55s; opacity: 1; transform: none; }
+
+  /* ── Image tiles ── */
+  .img-tile {
+    overflow: hidden; position: relative; background: #e8e0d4;
+    min-height: 0;
+  }
+  .img-tile img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    display: block;
+    transition: transform 0.65s var(--ease);
+  }
+  .img-tile.product-shot {
+    background: linear-gradient(165deg, #ddd4c6 0%, #cfc4b4 100%);
+  }
+  .img-tile.product-shot img {
+    object-fit: cover;
+    object-position: center 42%;
+    transform: scale(1.28);
+    transform-origin: center center;
+  }
+  .room-grid.layout-4 .img-tile:first-child.product-shot img {
+    transform: scale(1.42);
+    object-position: center 48%;
+  }
+  .img-tile::after {
+    content: ''; position: absolute; inset: 0;
+    background: var(--terra); opacity: 0;
+    transition: opacity 0.4s;
+    mix-blend-mode: multiply;
+  }
+  .img-tile:hover img { transform: scale(1.06); }
+  .img-tile.product-shot:hover img { transform: scale(1.34); }
+  .img-tile:hover::after { opacity: 0.12; }
+  .img-tile .tile-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 14px 16px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.55));
+    color: #fff; font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; font-weight: 500;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.4s, transform 0.4s var(--ease);
+  }
+  .img-tile:hover .tile-label { opacity: 1; transform: translateY(0); }
+
+  .section-tag {
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--terra); font-weight: 600; margin-bottom: 10px;
+  }
+
+  .section-title {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.5px;
+  }
+  .section-title em { font-style: normal; color: var(--terra); }
+
+  .body-text {
+    font-size: 14px; color: var(--muted); line-height: 1.85;
+    max-width: 420px;
+  }
+
+  .terra-bar {
+    background: var(--terra); color: #fff;
+    padding: 18px 32px; font-size: 12px; letter-spacing: 1px;
+  }
+
+  /* ═══ COVER ═══ */
+  .spread-cover {
+    display: grid; grid-template-columns: 1fr 1fr;
+    min-height: 520px;
+  }
+  .cover-copy {
+    padding: 56px 48px 40px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .cover-eyebrow {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 20px;
+  }
+  .cover-title {
+    font-size: clamp(36px, 5.5vw, 56px);
+    font-weight: 700; line-height: 1.02; letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .cover-title span { color: var(--terra); display: block; }
+  .cover-desc { font-size: 14px; color: var(--muted); max-width: 340px; line-height: 1.8; }
+  .cover-visual {
+    position: relative; min-height: 400px; overflow: hidden;
+  }
+  .parallax-wrap { overflow: hidden; position: relative; }
+  .parallax-wrap > img.parallax,
+  .cover-visual img,
+  .room-hero img {
+    width: 100%; height: 125%; min-height: 125%;
+    object-fit: cover; object-position: center;
+    display: block; will-change: transform;
+  }
+  .cover-visual img { min-height: 125%; }
+  .room-hero { position: relative; overflow: hidden; min-height: 280px; }
+  .room-hero img { min-height: 125%; }
+  .cover-visual .terra-accent {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 8px;
+    background: var(--terra);
+  }
+  .cover-footer {
+    grid-column: 1 / -1;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .spread-cover { grid-template-columns: 1fr; }
+    .cover-visual { min-height: 280px; }
+    .cover-visual img { min-height: 125%; }
+    .cover-copy { padding: 40px 28px; }
+  }
+
+  /* ═══ INTRO ═══ */
+  .spread-intro {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    min-height: 440px;
+  }
+  .intro-text {
+    padding: 56px 48px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .intro-terra {
+    background: var(--terra); color: #fff;
+    padding: 56px 48px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .intro-terra .section-title { color: #fff; }
+  .intro-terra .section-title em { color: var(--terra-light); }
+  .intro-terra p { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.85; margin-top: 16px; }
+
+  @media (max-width: 768px) {
+    .spread-intro { grid-template-columns: 1fr; }
+    .intro-text, .intro-terra { padding: 40px 28px; }
+  }
+
+  /* ═══ ROOM SPREADS ═══ */
+  .spread-room { padding: 0; }
+  .room-header {
+    display: grid; grid-template-columns: auto 1fr;
+    align-items: stretch;
+  }
+  .room-header-terra {
+    background: var(--terra); color: #fff;
+    padding: 40px 48px; min-width: 280px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .room-header-terra h2 {
+    font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.1;
+  }
+  .room-header-terra p {
+    font-size: 12px; opacity: 0.85; margin-top: 10px; line-height: 1.7;
+  }
+  .room-hero {
+    position: relative; overflow: hidden; min-height: 280px;
+  }
+  .room-hero:not(.parallax-wrap) img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; min-height: 100%;
+    object-fit: cover; object-position: center; display: block;
+  }
+  .room-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; border-top: 1px solid var(--line);
+  }
+  .room-grid .img-tile { aspect-ratio: 4/3; }
+  .room-grid .img-tile.tall { grid-row: span 2; aspect-ratio: auto; min-height: 100%; }
+  .room-grid.layout-4 {
+    grid-template-columns: 1.2fr 1fr 1fr;
+    grid-template-rows: 220px 220px;
+  }
+  .room-grid.layout-4 .img-tile:first-child {
+    grid-row: 1 / 3; aspect-ratio: auto;
+  }
+  .room-grid.layout-4 .img-tile:first-child.product-shot {
+    background: linear-gradient(160deg, #d8cfc0 0%, #c9bfb0 100%);
+  }
+
+  @media (max-width: 768px) {
+    .room-header { grid-template-columns: 1fr; }
+    .room-grid, .room-grid.layout-4 {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+    }
+    .room-grid .img-tile:first-child,
+    .room-grid.layout-4 .img-tile:first-child { grid-row: auto; }
+  }
+
+  /* ═══ KITCHEN — full bleed hero ═══ */
+  .kitchen-hero-wrap {
+    position: relative; height: 360px; overflow: hidden;
+  }
+  .kitchen-hero-wrap img {
+    width: 100%; height: 125%; min-height: 125%;
+    object-fit: cover; object-position: center;
+    display: block; will-change: transform;
+  }
+  .kitchen-hero-caption {
+    position: absolute; bottom: 32px; left: 48px;
+    background: var(--white); padding: 20px 28px;
+    max-width: 320px;
+  }
+  .kitchen-hero-caption h3 { font-size: 22px; font-weight: 700; }
+  .kitchen-hero-caption p { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* ═══ SERVICES ═══ */
+  .spread-services { padding: 56px 48px; background: var(--bg); }
+  .services-head { margin-bottom: 40px; }
+  .services-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .service-card {
+    background: var(--white); padding: 28px 24px;
+    border: 1px solid var(--line);
+    transition: border-color 0.3s, transform 0.4s var(--ease), box-shadow 0.4s;
+  }
+  .service-card:hover {
+    border-color: var(--terra);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(201,166,107,0.12);
+  }
+  .service-icon {
+    width: 44px; height: 44px; background: var(--terra-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 16px;
+    transition: background 0.3s;
+  }
+  .service-card:hover .service-icon { background: var(--terra); color: #fff; }
+  .service-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .service-card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  @media (max-width: 768px) {
+    .services-grid { grid-template-columns: 1fr; }
+    .spread-services { padding: 40px 28px; }
+  }
+
+  /* ═══ CONTACT ═══ */
+  .spread-contact {
+    display: grid; grid-template-columns: 1fr 1fr;
+    min-height: 400px;
+  }
+  .contact-visual { overflow: hidden; min-height: 320px; position: relative; }
+  .contact-visual img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    display: block; min-height: 400px;
+  }
+  .contact-info {
+    padding: 56px 48px;
+    display: flex; flex-direction: column; justify-content: center;
+    background: var(--terra); color: #fff;
+  }
+  .contact-info h2 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  .contact-info .sub { font-size: 13px; opacity: 0.8; margin-bottom: 32px; }
+  .contact-line {
+    font-size: 14px; line-height: 2.4;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding: 8px 0;
+  }
+  .contact-line strong {
+    display: inline-block; min-width: 72px;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    opacity: 0.7; font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .spread-contact { grid-template-columns: 1fr; }
+    .contact-info { padding: 40px 28px; }
+  }
+
+  /* ── Luxury editions A–D (from luxury-catalog) ── */
   .catalog {
     max-width: 900px; margin: 36px auto 60px;
     box-shadow: 0 0 80px rgba(0,0,0,0.7);
@@ -310,6 +697,94 @@
     font-family: 'Cormorant Garamond', serif; font-style: italic;
     font-size: 22px; color: var(--text2); line-height: 1.5; max-width: 560px;
   }
+
+  /* Noir text animations */
+  .cat-a { --a-ease: cubic-bezier(0.22, 1, 0.36, 1); }
+  .cat-a .a-rise {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.85s var(--a-ease), transform 0.85s var(--a-ease);
+  }
+  .cat-a .a-rise.is-visible { opacity: 1; transform: translateY(0); }
+  .cat-a .a-rise-skew {
+    opacity: 0; transform: translateY(40px) skewX(-4deg);
+    transition: opacity 0.9s var(--a-ease), transform 0.9s var(--a-ease);
+  }
+  .cat-a .a-rise-skew.is-visible { opacity: 1; transform: translateY(0) skewX(-4deg); }
+  .cat-a .a-rise-skew-2 {
+    opacity: 0; transform: translateY(28px) skewX(-2deg); transform-origin: left center;
+    transition: opacity 0.85s var(--a-ease), transform 0.85s var(--a-ease);
+  }
+  .cat-a .a-rise-skew-2.is-visible { opacity: 1; transform: translateY(0) skewX(-2deg); }
+  .cat-a .a-rise-skew-3 {
+    opacity: 0; transform: translateY(28px) skewX(-3deg); transform-origin: left center;
+    transition: opacity 0.85s var(--a-ease), transform 0.85s var(--a-ease);
+  }
+  .cat-a .a-rise-skew-3.is-visible { opacity: 1; transform: translateY(0) skewX(-3deg); }
+  .cat-a .a-slide-left {
+    opacity: 0; transform: translateX(-44px);
+    transition: opacity 0.85s var(--a-ease), transform 0.85s var(--a-ease);
+  }
+  .cat-a .a-slide-left.is-visible { opacity: 1; transform: translateX(0); }
+  .cat-a .a-slide-right {
+    opacity: 0; transform: translateX(44px);
+    transition: opacity 0.85s var(--a-ease), transform 0.85s var(--a-ease);
+  }
+  .cat-a .a-slide-right.is-visible { opacity: 1; transform: translateX(0); }
+  .cat-a .a-fade-soft {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 1.1s var(--a-ease) 0.25s, transform 1.1s var(--a-ease) 0.25s;
+  }
+  .cat-a .a-fade-soft.is-visible { opacity: 0.2; transform: translateY(0); }
+  .cat-a .a-stagger > * {
+    opacity: 0; transform: translateY(22px);
+    transition: opacity 0.75s var(--a-ease), transform 0.75s var(--a-ease);
+  }
+  .cat-a .a-stagger.is-visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(2) { transition-delay: 0.12s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(3) { transition-delay: 0.19s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(4) { transition-delay: 0.26s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(5) { transition-delay: 0.33s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(6) { transition-delay: 0.4s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(7) { transition-delay: 0.47s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(8) { transition-delay: 0.54s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(9) { transition-delay: 0.61s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(10) { transition-delay: 0.68s; opacity: 1; transform: none; }
+  .cat-a .a-stagger.is-visible > *:nth-child(11) { transition-delay: 0.75s; opacity: 1; transform: none; }
+  .cat-a .a-deals-tag.a-slide-left.is-visible { transform: skewX(-6deg); }
+  .cat-a .a-deals-tag.a-slide-left { transform: translateX(-44px) skewX(-6deg); }
+
+  /* Shared luxury text animations (B, C, D) */
+  #luxury-root { --lux-ease: cubic-bezier(0.22, 1, 0.36, 1); }
+  #luxury-root .lux-rise {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.85s var(--lux-ease), transform 0.85s var(--lux-ease);
+  }
+  #luxury-root .lux-rise.is-visible { opacity: 1; transform: translateY(0); }
+  #luxury-root .lux-slide-left {
+    opacity: 0; transform: translateX(-44px);
+    transition: opacity 0.85s var(--lux-ease), transform 0.85s var(--lux-ease);
+  }
+  #luxury-root .lux-slide-left.is-visible { opacity: 1; transform: translateX(0); }
+  #luxury-root .lux-slide-right {
+    opacity: 0; transform: translateX(44px);
+    transition: opacity 0.85s var(--lux-ease), transform 0.85s var(--lux-ease);
+  }
+  #luxury-root .lux-slide-right.is-visible { opacity: 1; transform: translateX(0); }
+  #luxury-root .lux-stagger > * {
+    opacity: 0; transform: translateY(22px);
+    transition: opacity 0.75s var(--lux-ease), transform 0.75s var(--lux-ease);
+  }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(2) { transition-delay: 0.12s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(3) { transition-delay: 0.19s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(4) { transition-delay: 0.26s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(5) { transition-delay: 0.33s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(6) { transition-delay: 0.4s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(7) { transition-delay: 0.47s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(8) { transition-delay: 0.54s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(9) { transition-delay: 0.61s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(10) { transition-delay: 0.68s; opacity: 1; transform: none; }
+  #luxury-root .lux-stagger.is-visible > *:nth-child(11) { transition-delay: 0.75s; opacity: 1; transform: none; }
 
   /* ══════════════════════════════════════════
      CATALOG B — ARCHITECTURAL MINIMAL
@@ -901,32 +1376,722 @@
   .d-cta h3 { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--text); line-height: 1.15; margin-bottom: 12px; }
   .d-cta p { font-size: 12px; color: var(--text3); line-height: 1.75; margin-bottom: 20px; }
   .d-cta-price { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold); letter-spacing: 2px; }
+
+  /* ══════════════════════════════════════════
+     CATALOG E — ARCH EDITORIAL
+     ══════════════════════════════════════════ */
+  .cat-e {
+    --e-green: #1a3d34;
+    --e-green-light: #2a5248;
+    --e-cream: #f5f0e8;
+    --e-charcoal: #1c1c1c;
+    --e-gray: #3a3a3a;
+    --e-gold: #d4b84a;
+    --e-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --e-font-display: 'Prata', Georgia, serif;
+    --e-font-body: 'Jost', sans-serif;
+    max-width: 1000px;
+    margin: 0 auto 60px;
+    background: var(--e-cream);
+    color: var(--e-charcoal);
+    font-family: var(--e-font-body);
+    font-weight: 400;
+    overflow: hidden;
+  }
+  .cat-e .e-cover-title,
+  .cat-e .e-h2,
+  .cat-e .e-contact-panel h3,
+  .cat-e .e-pill-price,
+  .cat-e .e-quote-text,
+  .cat-e .e-quote-mark {
+    font-family: var(--e-font-display);
+    font-weight: 400;
+  }
+  .cat-e .e-cover-tag,
+  .cat-e .e-section-label,
+  .cat-e .e-service-col h4,
+  .cat-e .e-pill-tier,
+  .cat-e .e-team-role,
+  .cat-e .e-quote-author,
+  .cat-e .e-contact-line span,
+  .cat-e .e-page-num,
+  .cat-e .e-bar-label {
+    font-family: var(--e-font-body);
+    font-weight: 500;
+  }
+  .cat-e .e-cover-title { font-weight: 400; letter-spacing: 0.02em; }
+  .cat-e .e-cover-title em { font-family: var(--e-font-body); font-weight: 500; }
+  .cat-e .e-team-name { font-family: var(--e-font-display); font-weight: 400; }
+  .e-page { position: relative; border-bottom: 1px solid rgba(26,61,52,0.12); }
+
+  /* Arch shape — semicircular SVG clip (smoother than border-radius) */
+  .e-arch {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4.25;
+    clip-path: url(#arch-clip-tall);
+    -webkit-clip-path: url(#arch-clip-tall);
+    overflow: hidden;
+    background: var(--e-green-light);
+    transform: scaleY(0);
+    transform-origin: bottom center;
+    transition: transform 1s var(--e-ease);
+  }
+  .e-arch.is-visible { transform: scaleY(1); }
+  .e-arch img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transform: scale(1.12);
+    transition: transform 1.2s var(--e-ease) 0.15s;
+  }
+  .e-arch.is-visible img { transform: scale(1); }
+  .e-arch-outline {
+    position: absolute; inset: 0;
+    box-shadow: inset 0 0 0 2px var(--e-gold);
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.8s var(--e-ease) 0.4s, transform 0.8s var(--e-ease) 0.4s;
+    pointer-events: none;
+  }
+  .e-arch.is-visible .e-arch-outline { opacity: 0.6; transform: scale(1); }
+
+  .e-arch-sm {
+    aspect-ratio: 2.5 / 3.5; max-width: 220px;
+    clip-path: url(#arch-clip-sm);
+    -webkit-clip-path: url(#arch-clip-sm);
+  }
+  .e-arch-wide {
+    aspect-ratio: 4 / 3; max-height: 320px;
+    clip-path: url(#arch-clip-wide);
+    -webkit-clip-path: url(#arch-clip-wide);
+  }
+
+  /* Reveals */
+  .e-rise { opacity: 0; transform: translateY(40px); transition: opacity 0.8s var(--e-ease), transform 0.8s var(--e-ease); }
+  .e-rise.is-visible { opacity: 1; transform: translateY(0); }
+  .e-slide-left { opacity: 0; transform: translateX(-48px); transition: opacity 0.85s var(--e-ease), transform 0.85s var(--e-ease); }
+  .e-slide-left.is-visible { opacity: 1; transform: translateX(0); }
+  .e-slide-right { opacity: 0; transform: translateX(48px); transition: opacity 0.85s var(--e-ease), transform 0.85s var(--e-ease); }
+  .e-slide-right.is-visible { opacity: 1; transform: translateX(0); }
+  .e-stagger > * { opacity: 0; transform: translateY(32px); transition: opacity 0.7s var(--e-ease), transform 0.7s var(--e-ease); }
+  .e-stagger.is-visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: none; }
+  .e-stagger.is-visible > *:nth-child(2) { transition-delay: 0.15s; opacity: 1; transform: none; }
+  .e-stagger.is-visible > *:nth-child(3) { transition-delay: 0.25s; opacity: 1; transform: none; }
+  .e-stagger.is-visible > *:nth-child(4) { transition-delay: 0.35s; opacity: 1; transform: none; }
+
+  /* Cover */
+  .e-cover {
+    display: grid; grid-template-columns: 1fr 1fr; min-height: 520px;
+    background: var(--e-green);
+    color: #fff;
+  }
+  .e-cover-copy { padding: 56px 48px; display: flex; flex-direction: column; justify-content: center; }
+  .e-cover-tag { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--e-gold); margin-bottom: 20px; }
+  .e-cover-title { font-size: clamp(36px, 5vw, 52px); line-height: 1.08; letter-spacing: 0.02em; text-transform: uppercase; }
+  .e-cover-title em { font-style: normal; color: var(--e-gold); display: block; font-size: 0.55em; letter-spacing: 6px; margin-top: 8px; text-transform: uppercase; }
+  .e-cover-desc { font-size: 15px; font-weight: 300; opacity: 0.85; line-height: 1.85; margin-top: 20px; max-width: 340px; }
+  .e-cover-visual { padding: 40px 48px 0; display: flex; align-items: flex-end; justify-content: center; background: var(--e-cream); }
+  .e-cover-visual .e-arch { max-width: 340px; }
+
+  /* Intro split */
+  .e-intro { display: grid; grid-template-columns: 1fr 1fr; min-height: 400px; }
+  .e-intro-left { padding: 48px; background: var(--e-cream); display: flex; flex-direction: column; justify-content: center; }
+  .e-intro-right { padding: 48px; background: var(--e-green); color: #fff; display: flex; flex-direction: column; justify-content: center; }
+  .e-section-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--e-green); margin-bottom: 12px; }
+  .e-intro-right .e-section-label { color: var(--e-gold); }
+  .e-h2 { font-size: clamp(28px, 4vw, 38px); line-height: 1.15; letter-spacing: 0.01em; }
+  .e-body { font-size: 15px; font-weight: 300; line-height: 1.85; color: #5a5a5a; margin-top: 16px; }
+  .e-intro-right .e-body { color: rgba(255,255,255,0.82); }
+
+  /* Services arch grid */
+  .e-services { padding: 56px 40px; background: var(--e-cream); }
+  .e-services-head { text-align: center; margin-bottom: 40px; }
+  .e-service-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .e-service-col {
+    background: var(--e-green); color: #fff;
+    padding: 0 20px 28px; text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+    transition: transform 0.4s var(--e-ease), box-shadow 0.4s;
+  }
+  .e-service-col:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(26,61,52,0.25); }
+  .e-service-col .e-arch-sm { margin: -20px auto 20px; width: 100%; background: var(--e-green-light); }
+  .e-service-col .e-arch-sm img { opacity: 0.9; }
+  .e-service-icon { font-size: 22px; color: var(--e-gold); margin-bottom: 12px; }
+  .e-service-col h4 { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .e-service-col p { font-size: 13px; font-weight: 300; opacity: 0.8; line-height: 1.65; }
+
+  /* Experience bars */
+  .e-experience { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--e-charcoal); color: #fff; }
+  .e-exp-visual { padding: 48px; display: flex; align-items: center; justify-content: center; background: var(--e-gray); }
+  .e-exp-visual .e-arch { max-width: 280px; }
+  .e-exp-content { padding: 48px; }
+  .e-exp-content .e-section-label { color: var(--e-gold); }
+  .e-bar-item { margin-bottom: 24px; }
+  .e-bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; letter-spacing: 0.5px; }
+  .e-bar-track { height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; }
+  .e-bar-fill {
+    height: 100%; background: var(--e-gold); width: 0;
+    transition: width 1.2s var(--e-ease);
+  }
+  .e-bar-item.is-visible .e-bar-fill { width: var(--w, 80%); }
+
+  /* Pricing pills */
+  .e-plans { padding: 56px 40px; background: var(--e-cream); }
+  .e-plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 36px; }
+  .e-pill {
+    background: var(--e-gray); color: #fff;
+    border-radius: 100px 100px 20px 20px;
+    padding: 44px 28px 32px; text-align: center;
+    transition: transform 0.45s var(--e-ease), background 0.3s;
+  }
+  .e-pill:hover { transform: translateY(-8px); background: var(--e-green); }
+  .e-pill.featured { background: var(--e-green); border: 2px solid var(--e-gold); }
+  .e-pill-tier { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--e-gold); margin-bottom: 12px; }
+  .e-pill-price { font-size: 36px; line-height: 1; margin-bottom: 4px; }
+  .e-pill-price sub { font-size: 12px; font-family: var(--e-font-body); font-weight: 400; opacity: 0.7; }
+  .e-pill-list { list-style: none; margin-top: 20px; text-align: left; }
+  .e-pill-list li { font-size: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.12); opacity: 0.85; }
+
+  /* Team */
+  .e-team { padding: 56px 40px; background: var(--e-green); color: #fff; text-align: center; }
+  .e-team .e-section-label { color: var(--e-gold); }
+  .e-team-grid { display: flex; justify-content: center; gap: 40px; margin-top: 36px; flex-wrap: wrap; }
+  .e-team-member { max-width: 160px; }
+  .e-team-photo {
+    width: 120px; height: 120px; border-radius: 50%;
+    overflow: hidden; margin: 0 auto 14px;
+    border: 3px solid var(--e-gold);
+    transform: scale(0);
+    transition: transform 0.6s var(--e-ease);
+  }
+  .e-team-member.is-visible .e-team-photo { transform: scale(1); }
+  .e-team-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .e-team-name { font-size: 15px; }
+  .e-team-role { font-size: 10px; opacity: 0.7; margin-top: 4px; letter-spacing: 1.5px; text-transform: uppercase; }
+
+  /* Testimonial */
+  .e-testimonial { display: grid; grid-template-columns: 1fr 1fr; min-height: 380px; background: var(--e-cream); }
+  .e-testi-visual { padding: 40px; display: flex; align-items: center; justify-content: center; }
+  .e-testi-visual .e-arch { max-width: 300px; }
+  .e-testi-quote { padding: 48px; display: flex; flex-direction: column; justify-content: center; }
+  .e-quote-mark { font-size: 72px; line-height: 0.5; color: var(--e-green); opacity: 0.3; }
+  .e-quote-text { font-size: 22px; line-height: 1.55; margin: 16px 0; color: var(--e-charcoal); }
+  .e-quote-author { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--e-green); }
+
+  /* Contact */
+  .e-contact { display: grid; grid-template-columns: 1.1fr 0.9fr; min-height: 400px; }
+  .e-contact-img { overflow: hidden; }
+  .e-contact-img img { width: 100%; height: 100%; min-height: 400px; object-fit: cover; display: block; }
+  .e-contact-panel { padding: 48px; background: var(--e-charcoal); color: #fff; display: flex; flex-direction: column; justify-content: center; }
+  .e-contact-panel h3 { font-size: 30px; margin-bottom: 8px; }
+  .e-contact-line { font-size: 13px; line-height: 2.4; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 6px 0; }
+  .e-contact-line span { color: var(--e-gold); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; display: inline-block; min-width: 64px; }
+
+  .e-page-num { position: absolute; bottom: 16px; right: 20px; font-size: 10px; letter-spacing: 2px; opacity: 0.4; }
+
+  @media (max-width: 768px) {
+    .e-cover, .e-intro, .e-experience, .e-testimonial, .e-contact { grid-template-columns: 1fr; }
+    .e-service-grid, .e-plans-grid { grid-template-columns: 1fr 1fr; }
+    .e-cover-copy, .e-intro-left, .e-intro-right { padding: 32px 28px; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-left, .stagger > *, .terra-block { transition: none; opacity: 1; transform: none; }
+    .img-tile img { transition: none; }
+    .e-arch, .e-arch img, .e-rise, .e-slide-left, .e-slide-right, .e-stagger > *, .e-bar-fill, .e-team-photo { transition: none; opacity: 1; transform: none; width: var(--w, 80%); }
+    .cat-a .a-rise, .cat-a .a-rise-skew, .cat-a .a-rise-skew-2, .cat-a .a-rise-skew-3,
+    .cat-a .a-slide-left, .cat-a .a-slide-right, .cat-a .a-fade-soft, .cat-a .a-stagger > * { transition: none; opacity: 1; transform: none; }
+    .cat-a .a-cover-title.a-rise-skew.is-visible { transform: skewX(-4deg); }
+    .cat-a .a-rise-skew-2.is-visible { transform: skewX(-2deg); }
+    .cat-a .a-rise-skew-3.is-visible { transform: skewX(-3deg); }
+    .cat-a .a-cover-year.a-fade-soft.is-visible { opacity: 0.2; }
+    .cat-a .a-deals-tag.a-slide-left.is-visible { transform: skewX(-6deg); }
+    #luxury-root .lux-rise, #luxury-root .lux-slide-left, #luxury-root .lux-slide-right, #luxury-root .lux-stagger > * { transition: none; opacity: 1; transform: none; }
+  }
 </style>
 </head>
-<body>
+<body class="edition-2030">
 
-<!-- CATALOG SWITCHER -->
+<!-- Edition switcher — 5 catalog variations -->
 <div class="switcher">
   <span class="switcher-label">Edition</span>
-  <button class="cat-btn active" data-cat="a" onclick="setCatalog('a')">
+  <button type="button" class="cat-btn" data-cat="a" onclick="setCatalog('a')">
     <span class="cat-swatch" style="background:#1a1f1a;border:1px solid #b5c4a0"></span> A — Noir Editorial
   </button>
-  <button class="cat-btn" data-cat="b" onclick="setCatalog('b')">
+  <button type="button" class="cat-btn" data-cat="b" onclick="setCatalog('b')">
     <span class="cat-swatch" style="background:#f4f3f0;border:1px solid #5a6a7a"></span> B — Architectural Minimal
   </button>
-  <button class="cat-btn" data-cat="c" onclick="setCatalog('c')">
+  <button type="button" class="cat-btn" data-cat="c" onclick="setCatalog('c')">
     <span class="cat-swatch" style="background:#faf6f0;border:1px solid #c4785a"></span> C — Warm Artisan
   </button>
-  <button class="cat-btn" data-cat="d" onclick="setCatalog('d')">
+  <button type="button" class="cat-btn" data-cat="d" onclick="setCatalog('d')">
     <span class="cat-swatch" style="background:#faf8f4;border:1px solid #b8963e"></span> D — Modern Luxury
+  </button>
+  <button type="button" class="cat-btn" data-cat="e" onclick="setCatalog('e')">
+    <span class="cat-swatch" style="background:#1a3d34;border:1px solid #d4b84a"></span> E — Arch Editorial
+  </button>
+  <button type="button" class="cat-btn active" data-cat="2030" onclick="setCatalog('2030')">
+    <span class="cat-swatch" style="background:#faf6f0;border:1px solid #c9a66b"></span> 2030 — Room Catalog
   </button>
 </div>
 
+<div class="progress-bar" id="progressBar"></div>
+
+<svg aria-hidden="true" width="0" height="0" style="position:absolute;pointer-events:none">
+  <defs>
+    <clipPath id="arch-clip-tall" clipPathUnits="objectBoundingBox">
+      <path d="M 0 1 L 0 0.353 A 0.5 0.353 0 0 1 1 0.353 L 1 1 Z"/>
+    </clipPath>
+    <clipPath id="arch-clip-sm" clipPathUnits="objectBoundingBox">
+      <path d="M 0 1 L 0 0.357 A 0.5 0.357 0 0 1 1 0.357 L 1 1 Z"/>
+    </clipPath>
+    <clipPath id="arch-clip-wide" clipPathUnits="objectBoundingBox">
+      <path d="M 0 1 L 0 0.667 A 0.5 0.667 0 0 1 1 0.667 L 1 1 Z"/>
+    </clipPath>
+  </defs>
+</svg>
+
+<nav class="catalog-nav" aria-label="Catalog sections"></nav>
+
+<div class="edition-wrap active" id="cat-2030">
+
+  <!-- COVER -->
+  <section class="spread spread-cover" id="cover" data-section="cover">
+    <div class="cover-copy">
+      <p class="cover-eyebrow reveal">Design trends for 2030</p>
+      <h1 class="cover-title reveal">
+        Interior Design
+        <span>Catalog</span>
+      </h1>
+      <p class="cover-desc reveal">A curated look at timeless spaces — living, bath, kitchen, bedroom, and work — shaped for how we live next.</p>
+    </div>
+    <div class="cover-visual parallax-wrap">
+      <img src="assets/catalog-modern/hero.jpg" alt="Modern lounge interior" class="parallax" data-speed="0.15" loading="eager">
+      <div class="terra-accent terra-block"></div>
+    </div>
+    <div class="cover-footer terra-bar reveal">
+      <span>La Maison Studio</span>
+      <span>Edition 2030 · Vol. 01</span>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="spread spread-intro" id="intro" data-section="intro">
+    <div class="intro-text">
+      <p class="section-tag reveal">Elevate your space</p>
+      <h2 class="section-title reveal">Spaces that feel<br><em>intentional</em></h2>
+      <p class="body-text reveal" style="margin-top:20px">We believe great interiors balance proportion, material honesty, and warmth. This catalog walks room by room through pieces and palettes built to last beyond the season.</p>
+      <p class="body-text reveal" style="margin-top:14px">Every spread pairs photography with practical guidance — so you can envision, specify, and live well.</p>
+    </div>
+    <div class="intro-terra reveal-left">
+      <p class="section-tag" style="color:rgba(255,255,255,0.7)">Our approach</p>
+      <h2 class="section-title">Interior<br><em>Design</em></h2>
+      <p>From first sketch to final styling, we document materials, dimensions, and finishing details with the clarity of an architectural spec — and the soul of a home.</p>
+    </div>
+  </section>
+
+  <!-- LIVING ROOM -->
+  <section class="spread spread-room" id="living" data-section="living">
+    <div class="room-header">
+      <div class="room-header-terra reveal-left">
+        <p class="section-tag" style="color:rgba(255,255,255,0.7)">01 — Gather</p>
+        <h2>Living Room</h2>
+        <p>Layered textures, low profiles, and light that flatters conversation.</p>
+      </div>
+      <div class="room-hero parallax-wrap reveal">
+        <img src="assets/catalog-modern/living-4.jpg" alt="Living room interior" class="parallax" data-speed="0.12" loading="lazy">
+      </div>
+    </div>
+    <div class="room-grid layout-4 stagger">
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/living-1.png" alt="Velvet lounge sofa" loading="lazy">
+        <span class="tile-label">Velvet Lounge Sofa</span>
+      </div>
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/living-2.png" alt="Sofa in situ" loading="lazy">
+        <span class="tile-label">Bouclé Seating</span>
+      </div>
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/living-3.png" alt="Marble side table" loading="lazy">
+        <span class="tile-label">Marble Accent</span>
+      </div>
+      <div class="img-tile">
+        <img src="assets/catalog-modern/living-4.jpg" alt="Curated living space" loading="lazy">
+        <span class="tile-label">Full Styling</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BATHROOM -->
+  <section class="spread spread-room" id="bathroom" data-section="bathroom">
+    <div class="room-header">
+      <div class="room-header-terra reveal-left">
+        <p class="section-tag" style="color:rgba(255,255,255,0.7)">02 — Restore</p>
+        <h2>Bathroom Interior</h2>
+        <p>Stone, brass, and calm surfaces for daily rituals.</p>
+      </div>
+      <div class="room-hero reveal">
+        <img src="assets/catalog-modern/bath-3.jpg" alt="Modern bathroom" loading="lazy">
+      </div>
+    </div>
+    <div class="room-grid stagger">
+      <div class="img-tile">
+        <img src="assets/catalog-modern/bath-3.jpg" alt="Spa bathroom" loading="lazy">
+        <span class="tile-label">Spa Palette</span>
+      </div>
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/bath-2.png" alt="Marble surfaces" loading="lazy">
+        <span class="tile-label">Carrara Stone</span>
+      </div>
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/bath-1.png" alt="Accent seating" loading="lazy">
+        <span class="tile-label">Accent Form</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- KITCHEN -->
+  <section class="spread spread-room" id="kitchen" data-section="kitchen">
+    <div class="kitchen-hero-wrap parallax-wrap reveal">
+      <img src="assets/catalog-modern/kitchen-hero.jpg" alt="Architectural kitchen" class="parallax" data-speed="0.18" loading="lazy">
+      <div class="kitchen-hero-caption reveal">
+        <p class="section-tag">03 — Craft</p>
+        <h3>Kitchen Architectural</h3>
+        <p>Clean lines, warm wood, and task lighting that works as sculpture.</p>
+      </div>
+    </div>
+    <div class="room-grid stagger">
+      <div class="img-tile">
+        <img src="assets/catalog-modern/kitchen-hero.jpg" alt="Kitchen island" loading="lazy">
+        <span class="tile-label">Island Layout</span>
+      </div>
+      <div class="img-tile">
+        <img src="assets/catalog-modern/kitchen-1.jpg" alt="Kitchen styling" loading="lazy">
+        <span class="tile-label">Warm Details</span>
+      </div>
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/kitchen-3.png" alt="Pendant lighting" loading="lazy">
+        <span class="tile-label">Pendant Light</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BEDROOM -->
+  <section class="spread spread-room" id="bedroom" data-section="bedroom">
+    <div class="room-header">
+      <div class="room-header-terra reveal-left">
+        <p class="section-tag" style="color:rgba(255,255,255,0.7)">04 — Rest</p>
+        <h2>Bedroom Interior</h2>
+        <p>Soft light, tactile fabrics, and furniture that whispers.</p>
+      </div>
+      <div class="room-hero reveal">
+        <img src="assets/catalog-modern/bedroom-3.jpg" alt="Bedroom atmosphere" loading="lazy">
+      </div>
+    </div>
+    <div class="room-grid stagger">
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/bedroom-1.png" alt="Wall sconce" loading="lazy">
+        <span class="tile-label">Linnea Sconce</span>
+      </div>
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/bedroom-2.png" alt="Table lamp" loading="lazy">
+        <span class="tile-label">Volta Lamp</span>
+      </div>
+      <div class="img-tile">
+        <img src="assets/catalog-modern/bedroom-3.jpg" alt="Bedroom styling" loading="lazy">
+        <span class="tile-label">Layered Calm</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- OFFICE -->
+  <section class="spread spread-room" id="office" data-section="office">
+    <div class="room-header">
+      <div class="room-header-terra reveal-left">
+        <p class="section-tag" style="color:rgba(255,255,255,0.7)">05 — Focus</p>
+        <h2>Office Room</h2>
+        <p>Professional warmth — storage, seating, and light for deep work.</p>
+      </div>
+      <div class="room-hero parallax-wrap reveal">
+        <img src="assets/catalog-modern/office-3.jpg" alt="Office interior" class="parallax" data-speed="0.1" loading="lazy">
+      </div>
+    </div>
+    <div class="room-grid stagger">
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/office-1.png" alt="Bookshelf storage" loading="lazy">
+        <span class="tile-label">Open Storage</span>
+      </div>
+      <div class="img-tile product-shot">
+        <img src="assets/catalog-modern/office-2.png" alt="Lounge chair" loading="lazy">
+        <span class="tile-label">Reading Chair</span>
+      </div>
+      <div class="img-tile">
+        <img src="assets/catalog-modern/office-3.jpg" alt="Studio workspace" loading="lazy">
+        <span class="tile-label">Studio Fit-out</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CORE SERVICES -->
+  <section class="spread spread-services" id="services" data-section="services">
+    <div class="services-head">
+      <p class="section-tag reveal">What we offer</p>
+      <h2 class="section-title reveal">Core <em>Service</em></h2>
+    </div>
+    <div class="services-grid stagger">
+      <article class="service-card">
+        <div class="service-icon">◇</div>
+        <h4>Space Planning</h4>
+        <p>Floor plans, furniture layouts, and circulation studies for residential and commercial projects.</p>
+      </article>
+      <article class="service-card">
+        <div class="service-icon">◈</div>
+        <h4>Material Specification</h4>
+        <p>Curated palettes — timber, stone, metal, and textile — with documented sourcing and lead times.</p>
+      </article>
+      <article class="service-card">
+        <div class="service-icon">◎</div>
+        <h4>Custom Furnishing</h4>
+        <p>Bespoke and catalog pieces tailored to scale, finish, and installation requirements.</p>
+      </article>
+      <article class="service-card">
+        <div class="service-icon">▣</div>
+        <h4>Lighting Design</h4>
+        <p>Layered ambient, task, and accent schemes with fixture specification and dimming control.</p>
+      </article>
+      <article class="service-card">
+        <div class="service-icon">◐</div>
+        <h4>Styling &amp; Install</h4>
+        <p>White-glove delivery, art placement, and final dressing for move-in ready spaces.</p>
+      </article>
+      <article class="service-card">
+        <div class="service-icon">✦</div>
+        <h4>Trade Program</h4>
+        <p>Architect and designer accounts with CAD blocks, swatch sets, and dedicated specification support.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="spread spread-contact" id="contact" data-section="contact">
+    <div class="contact-visual reveal">
+      <img src="assets/catalog-modern/contact.jpg" alt="La Maison studio" loading="lazy">
+    </div>
+    <div class="contact-info reveal-left">
+      <h2>Get in Touch</h2>
+      <p class="sub">Walk-ins welcome · Private consultations by appointment</p>
+      <div class="contact-line"><strong>Studio</strong> 12 Artisan Lane, Banjara Hills, Hyderabad</div>
+      <div class="contact-line"><strong>Phone</strong> +91 98765 43210</div>
+      <div class="contact-line"><strong>Email</strong> hello@lamaison.in</div>
+      <div class="contact-line"><strong>Web</strong> www.lamaison.in</div>
+    </div>
+  </section>
+
+</div>
+
 <!-- ════════════════════════════════════════════
-     CATALOG A — NOIR EDITORIAL
+     CATALOG E — ARCH EDITORIAL
      ════════════════════════════════════════════ -->
-<!-- Template A images live in assets/catalog-a/ — swap any file with a Pinterest save (same filename) -->
-<div class="catalog-wrap active" id="cat-a">
+<div class="edition-wrap" id="cat-e">
+<div class="cat-e">
+
+  <!-- COVER -->
+  <section class="e-page e-cover" id="e-cover">
+    <div class="e-cover-copy">
+      <p class="e-cover-tag e-rise">Interior Design Studio</p>
+      <h1 class="e-cover-title e-rise">We Love<br>To <em>Design</em></h1>
+      <p class="e-cover-desc e-rise">Spaces shaped by proportion, natural materials, and the quiet confidence of the arch — our signature form.</p>
+    </div>
+    <div class="e-cover-visual">
+      <div class="e-arch e-arch-rise">
+        <span class="e-arch-outline"></span>
+        <img src="assets/catalog-arch/hero.png" alt="Modern interior with arched forms" loading="eager">
+      </div>
+    </div>
+    <span class="e-page-num" style="color:#fff;left:20px;right:auto">01 / 08</span>
+  </section>
+
+  <!-- INTRO -->
+  <section class="e-page e-intro" id="e-intro">
+    <div class="e-intro-left">
+      <p class="e-section-label e-slide-left">Our philosophy</p>
+      <h2 class="e-h2 e-slide-left">Form follows<br>feeling</h2>
+      <p class="e-body e-slide-left">Every La Maison project begins with how a room should feel — then we draw the arch, choose the stone, and specify the light that brings it to life.</p>
+    </div>
+    <div class="e-intro-right">
+      <p class="e-section-label e-slide-right">Since 2011</p>
+      <h2 class="e-h2 e-slide-right">Designing<br>for permanence</h2>
+      <p class="e-body e-slide-right">We create interiors that age with grace — honest materials, timeless geometry, and craftsmanship built to last generations.</p>
+    </div>
+    <span class="e-page-num">02 / 08</span>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="e-page e-services" id="e-services">
+    <div class="e-services-head">
+      <p class="e-section-label e-rise">What we do</p>
+      <h2 class="e-h2 e-rise">Core Services</h2>
+    </div>
+    <div class="e-service-grid e-stagger">
+      <div class="e-service-col">
+        <div class="e-arch e-arch-sm e-arch-rise"><img src="assets/catalog-arch/living.png" alt="Space planning"></div>
+        <span class="e-service-icon">◇</span>
+        <h4>Space Planning</h4>
+        <p>Layouts that flow — from floor plan to furniture placement.</p>
+      </div>
+      <div class="e-service-col">
+        <div class="e-arch e-arch-sm e-arch-rise"><img src="assets/catalog-arch/detail-1.png" alt="Materials"></div>
+        <span class="e-service-icon">◈</span>
+        <h4>Materials</h4>
+        <p>Stone, timber, brass — specified with full traceability.</p>
+      </div>
+      <div class="e-service-col">
+        <div class="e-arch e-arch-sm e-arch-rise"><img src="assets/catalog-arch/detail-2.png" alt="Lighting"></div>
+        <span class="e-service-icon">◎</span>
+        <h4>Lighting</h4>
+        <p>Ambient, task, and accent layers for every room.</p>
+      </div>
+      <div class="e-service-col">
+        <div class="e-arch e-arch-sm e-arch-rise"><img src="assets/catalog-arch/project.jpg" alt="Styling"></div>
+        <span class="e-service-icon">✦</span>
+        <h4>Styling</h4>
+        <p>White-glove install and final dressing of your space.</p>
+      </div>
+    </div>
+    <span class="e-page-num">03 / 08</span>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="e-page e-experience" id="e-experience">
+    <div class="e-exp-visual">
+      <div class="e-arch e-arch-rise">
+        <span class="e-arch-outline"></span>
+        <img src="assets/catalog-arch/studio.jpg" alt="Design studio" loading="lazy">
+      </div>
+    </div>
+    <div class="e-exp-content">
+      <p class="e-section-label e-rise">Direct experience</p>
+      <h2 class="e-h2 e-rise" style="color:#fff;margin-bottom:28px">Our expertise</h2>
+      <div class="e-bar-item e-rise" style="--w:92%">
+        <div class="e-bar-label"><span>Residential Design</span><span>92%</span></div>
+        <div class="e-bar-track"><div class="e-bar-fill"></div></div>
+      </div>
+      <div class="e-bar-item e-rise" style="--w:88%">
+        <div class="e-bar-label"><span>Material Sourcing</span><span>88%</span></div>
+        <div class="e-bar-track"><div class="e-bar-fill"></div></div>
+      </div>
+      <div class="e-bar-item e-rise" style="--w:95%">
+        <div class="e-bar-label"><span>Custom Furnishing</span><span>95%</span></div>
+        <div class="e-bar-track"><div class="e-bar-fill"></div></div>
+      </div>
+      <div class="e-bar-item e-rise" style="--w:85%">
+        <div class="e-bar-label"><span>Project Delivery</span><span>85%</span></div>
+        <div class="e-bar-track"><div class="e-bar-fill"></div></div>
+      </div>
+    </div>
+    <span class="e-page-num" style="color:#fff">04 / 08</span>
+  </section>
+
+  <!-- PLANS -->
+  <section class="e-page e-plans" id="e-plans">
+    <div style="text-align:center">
+      <p class="e-section-label e-rise">Packages</p>
+      <h2 class="e-h2 e-rise">Design Plans</h2>
+    </div>
+    <div class="e-plans-grid e-stagger">
+      <div class="e-pill">
+        <p class="e-pill-tier">Essential</p>
+        <p class="e-pill-price">₹2.4L<sub>/room</sub></p>
+        <ul class="e-pill-list">
+          <li>Space planning &amp; layout</li>
+          <li>Material palette</li>
+          <li>Furniture specification</li>
+        </ul>
+      </div>
+      <div class="e-pill featured">
+        <p class="e-pill-tier">Signature</p>
+        <p class="e-pill-price">₹5.8L<sub>/project</sub></p>
+        <ul class="e-pill-list">
+          <li>Full interior specification</li>
+          <li>Custom furnishing</li>
+          <li>Lighting design</li>
+          <li>White-glove install</li>
+        </ul>
+      </div>
+      <div class="e-pill">
+        <p class="e-pill-tier">Bespoke</p>
+        <p class="e-pill-price">Custom</p>
+        <ul class="e-pill-list">
+          <li>End-to-end design</li>
+          <li>Artisan commissions</li>
+          <li>Multi-property portfolio</li>
+        </ul>
+      </div>
+    </div>
+    <span class="e-page-num">05 / 08</span>
+  </section>
+
+  <!-- TEAM -->
+  <section class="e-page e-team" id="e-team">
+    <p class="e-section-label e-rise">The studio</p>
+    <h2 class="e-h2 e-rise">Meet the team</h2>
+    <div class="e-team-grid">
+      <div class="e-team-member e-rise">
+        <div class="e-team-photo"><img src="assets/catalog-arch/team-1.png" alt="Lead designer"></div>
+        <p class="e-team-name">Ananya Rao</p>
+        <p class="e-team-role">Lead Designer</p>
+      </div>
+      <div class="e-team-member e-rise">
+        <div class="e-team-photo"><img src="assets/catalog-arch/team-2.png" alt="Lighting specialist"></div>
+        <p class="e-team-name">Thomas Berg</p>
+        <p class="e-team-role">Lighting · Brass</p>
+      </div>
+      <div class="e-team-member e-rise">
+        <div class="e-team-photo"><img src="assets/catalog-arch/team-3.png" alt="Materials curator"></div>
+        <p class="e-team-name">Elena Rossi</p>
+        <p class="e-team-role">Materials · Stone</p>
+      </div>
+    </div>
+    <span class="e-page-num" style="color:#fff">06 / 08</span>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="e-page e-testimonial" id="e-testimonial">
+    <div class="e-testi-visual">
+      <div class="e-arch e-arch-rise">
+        <span class="e-arch-outline"></span>
+        <img src="assets/catalog-arch/testimonial.jpg" alt="Client home interior" loading="lazy">
+      </div>
+    </div>
+    <div class="e-testi-quote">
+      <span class="e-quote-mark e-rise">"</span>
+      <p class="e-quote-text e-rise">Our home finally feels complete. The design team understood the brief on the first call — truly rare in this industry.</p>
+      <p class="e-quote-author e-rise">Priya Sharma — Architect, Bengaluru</p>
+    </div>
+    <span class="e-page-num">07 / 08</span>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="e-page e-contact" id="e-contact">
+    <div class="e-contact-img e-rise">
+      <img src="assets/catalog-arch/contact.jpg" alt="La Maison studio" loading="lazy">
+    </div>
+    <div class="e-contact-panel e-slide-right">
+      <p class="e-section-label" style="color:var(--e-gold)">Visit us</p>
+      <h3>Start your project</h3>
+      <p class="e-body" style="color:rgba(255,255,255,0.7);margin-bottom:24px">Walk-ins welcome Mon–Sat, 10am–7pm. Private consultations by appointment.</p>
+      <div class="e-contact-line"><span>Studio</span> 12 Artisan Lane, Banjara Hills, Hyderabad</div>
+      <div class="e-contact-line"><span>Phone</span> +91 98765 43210</div>
+      <div class="e-contact-line"><span>Email</span> hello@lamaison.in</div>
+    </div>
+    <span class="e-page-num" style="color:#fff">08 / 08</span>
+  </section>
+
+</div>
+</div>
+
+<div id="luxury-root" class="edition-wrap">
+<div class="catalog-wrap" id="cat-a">
 <div class="catalog cat-a">
 
   <!-- COVER -->
@@ -935,11 +2100,11 @@
       <img class="a-img" src="assets/catalog-a/cover.png" alt="Warm neutral living room interior" loading="eager">
     </div>
     <div class="a-cover-content">
-      <div class="a-cover-brand">La Maison — Collection 2025</div>
+      <div class="a-cover-brand a-rise">La Maison — Collection 2025</div>
       <div>
-        <div class="a-cover-title">Interior<em>Design</em></div>
-        <p class="a-cover-tag">Crafted for those who believe every space tells a story.</p>
-        <div class="a-cover-year">2025</div>
+        <div class="a-cover-title a-rise-skew">Interior<em>Design</em></div>
+        <p class="a-cover-tag a-rise">Crafted for those who believe every space tells a story.</p>
+        <div class="a-cover-year a-fade-soft">2025</div>
       </div>
       <div class="page-num" style="color:var(--text5)">01 / 12</div>
     </div>
@@ -949,11 +2114,11 @@
   <!-- CONTENTS -->
   <div class="page a-toc">
     <div class="a-toc-left">
-      <div class="a-eyebrow">What's inside</div>
-      <div class="a-toc-title">Table of<br><em>Contents</em></div>
+      <div class="a-eyebrow a-rise">What's inside</div>
+      <div class="a-toc-title a-rise">Table of<br><em>Contents</em></div>
     </div>
     <div class="a-toc-right">
-      <ul class="a-toc-list">
+      <ul class="a-toc-list a-stagger">
         <li class="a-toc-item"><span class="a-toc-num">01</span><span class="a-toc-name">Cover</span><span class="a-toc-dots"></span><span class="a-toc-pg">01</span></li>
         <li class="a-toc-item"><span class="a-toc-num">02</span><span class="a-toc-name">About Us</span><span class="a-toc-dots"></span><span class="a-toc-pg">03</span></li>
         <li class="a-toc-item"><span class="a-toc-num">03</span><span class="a-toc-name">Editorial</span><span class="a-toc-dots"></span><span class="a-toc-pg">04</span></li>
@@ -974,12 +2139,12 @@
   <!-- ABOUT -->
   <div class="page a-about">
     <div class="a-about-content">
-      <div class="a-eyebrow">Our story</div>
-      <div class="a-h2">Designing Spaces<br>That Last</div>
-      <p class="a-body">We are a collective of designers, craftspeople, and visionaries committed to bringing warmth and intention into every interior. For over a decade, our pieces have graced homes across the world.</p>
-      <p class="a-body">We source only sustainable materials and work with artisan studios to ensure each product is made to last generations — not just seasons.</p>
-      <div class="a-about-pull"><p>"Beauty is not a luxury — it is the language of living well."</p></div>
-      <div class="a-stats">
+      <div class="a-eyebrow a-rise">Our story</div>
+      <div class="a-h2 a-rise">Designing Spaces<br>That Last</div>
+      <p class="a-body a-rise">We are a collective of designers, craftspeople, and visionaries committed to bringing warmth and intention into every interior. For over a decade, our pieces have graced homes across the world.</p>
+      <p class="a-body a-rise">We source only sustainable materials and work with artisan studios to ensure each product is made to last generations — not just seasons.</p>
+      <div class="a-about-pull a-rise"><p>"Beauty is not a luxury — it is the language of living well."</p></div>
+      <div class="a-stats a-stagger">
         <div><div class="a-stat-num">14+</div><div class="a-stat-label">Years</div></div>
         <div><div class="a-stat-num">800+</div><div class="a-stat-label">Projects</div></div>
         <div><div class="a-stat-num">42</div><div class="a-stat-label">Countries</div></div>
@@ -997,7 +2162,7 @@
     <div class="a-quote-band-bg">
       <img class="a-img" src="assets/catalog-a/quote-band.jpg" alt="" loading="lazy">
     </div>
-    <p>Every room we enter should whisper intention, not demand attention.</p>
+    <p class="a-rise">Every room we enter should whisper intention, not demand attention.</p>
     <div class="page-num" style="color:var(--text5)">04 / 12</div>
   </div>
   <div class="divider"></div>
@@ -1005,10 +2170,10 @@
   <!-- PRODUCTS — 3-col masonry -->
   <div class="page a-products">
     <div class="a-header">
-      <div class="a-eyebrow">New arrivals</div>
-      <div class="a-h2">Trending This Season</div>
+      <div class="a-eyebrow a-rise">New arrivals</div>
+      <div class="a-h2 a-rise">Trending This Season</div>
     </div>
-    <div class="a-masonry">
+    <div class="a-masonry a-stagger">
       <div class="a-card">
         <div class="a-card-img" style="height:280px">
           <div class="a-badge">New</div>
@@ -1084,10 +2249,10 @@
       <img class="a-img" src="assets/catalog-a/spotlight-sofa.png" alt="Velvet lounge sofa in situ" loading="lazy">
     </div>
     <div class="a-spotlight-content">
-      <div class="a-eyebrow">Featured piece</div>
-      <div class="a-h2" style="transform:skewX(-3deg);transform-origin:left">Velvet<br>Lounge Sofa</div>
-      <div class="a-spotlight-price">₹1,28,000</div>
-      <p class="a-spotlight-desc">Italian bouclé upholstery on a solid oak frame. Deep enough to disappear into. Available in Cream, Moss, and Slate.</p>
+      <div class="a-eyebrow a-rise">Featured piece</div>
+      <div class="a-h2 a-rise-skew-3">Velvet<br>Lounge Sofa</div>
+      <div class="a-spotlight-price a-rise">₹1,28,000</div>
+      <p class="a-spotlight-desc a-rise">Italian bouclé upholstery on a solid oak frame. Deep enough to disappear into. Available in Cream, Moss, and Slate.</p>
     </div>
     <div class="page-num" style="color:var(--text5)">06 / 12</div>
   </div>
@@ -1096,10 +2261,10 @@
   <!-- PRODUCTS 2 — Lighting -->
   <div class="page a-products">
     <div class="a-header">
-      <div class="a-eyebrow">Curated selection</div>
-      <div class="a-h2" style="transform:skewX(-2deg);transform-origin:left">Lighting &amp; Objects</div>
+      <div class="a-eyebrow a-rise">Curated selection</div>
+      <div class="a-h2 a-rise-skew-2">Lighting &amp; Objects</div>
     </div>
-    <div class="a-masonry">
+    <div class="a-masonry a-stagger">
       <div class="a-card">
         <div class="a-card-img" style="height:190px">
           <img class="a-img" src="assets/catalog-a/volta-lamp.png" alt="Volta table lamp" loading="lazy">
@@ -1132,12 +2297,12 @@
 
   <!-- PORTFOLIO -->
   <div class="page a-editorial">
-    <div class="a-editorial-sidebar">
+    <div class="a-editorial-sidebar a-slide-left">
       <div class="a-eyebrow" style="color:var(--bg);opacity:0.6">Portfolio</div>
       <div class="a-h2">Spaces We've<br>Shaped</div>
       <p>From intimate studios to expansive villas — our design language adapts without losing its soul.</p>
     </div>
-    <div class="a-editorial-grid">
+    <div class="a-editorial-grid a-stagger">
       <div class="a-editorial-row">
         <div class="a-ed-cell">
           <img class="a-img" src="assets/catalog-a/portfolio-1.jpg" alt="House in Repino — lakeside interior" loading="lazy">
@@ -1164,13 +2329,13 @@
   <!-- DEALS — asymmetric -->
   <div class="page a-deals">
     <div class="a-deals-visual">
-      <div class="a-deals-tag">Hot Deals</div>
+      <div class="a-deals-tag a-slide-left">Hot Deals</div>
       <img class="a-img" src="assets/catalog-a/deals.jpg" alt="Curated furniture collection" loading="lazy">
     </div>
-    <div class="a-deals-content">
-      <div class="a-eyebrow">Limited time</div>
-      <div class="a-h2">Season Markdowns</div>
-      <div style="margin-top:24px">
+    <div class="a-deals-content a-slide-right">
+      <div class="a-eyebrow a-rise">Limited time</div>
+      <div class="a-h2 a-rise">Season Markdowns</div>
+      <div class="a-stagger" style="margin-top:24px">
         <div class="a-deal-row"><span class="a-deal-name">Rattan Bookshelf</span><span><span class="a-deal-old">₹45,000</span><span class="a-deal-new">₹32,000</span></span></div>
         <div class="a-deal-row"><span class="a-deal-name">Woven Pendant Light</span><span><span class="a-deal-old">₹18,500</span><span class="a-deal-new">₹12,999</span></span></div>
         <div class="a-deal-row"><span class="a-deal-name">Ceramic Accent Chair</span><span><span class="a-deal-old">₹62,000</span><span class="a-deal-new">₹44,500</span></span></div>
@@ -1186,8 +2351,8 @@
     <div class="a-quote-bg">
       <img class="a-img" src="assets/catalog-a/quote-full.jpg" alt="" loading="lazy">
     </div>
-    <p class="a-quote-text">Beauty is not a luxury — it is the language of living well. Every room we enter should whisper intention, not demand attention.</p>
-    <div class="a-quote-attr">— Elena Voss, Creative Director</div>
+    <p class="a-quote-text a-rise">Beauty is not a luxury — it is the language of living well. Every room we enter should whisper intention, not demand attention.</p>
+    <div class="a-quote-attr a-rise">— Elena Voss, Creative Director</div>
     <div class="page-num" style="color:var(--text5)">10 / 12</div>
   </div>
   <div class="divider"></div>
@@ -1195,10 +2360,10 @@
   <!-- TESTIMONIALS -->
   <div class="page a-testimonials">
     <div class="a-header">
-      <div class="a-eyebrow">What clients say</div>
-      <div class="a-h2">Stories of Living Well</div>
+      <div class="a-eyebrow a-rise">What clients say</div>
+      <div class="a-h2 a-rise">Stories of Living Well</div>
     </div>
-    <div class="a-testi-grid">
+    <div class="a-testi-grid a-stagger">
       <div class="a-testi">
         <div class="a-testi-stars">★★★★★</div>
         <p class="a-testi-text">"Every piece we ordered arrived exactly as described — the craftsmanship was beyond what I expected."</p>
@@ -1224,7 +2389,7 @@
 
   <!-- CONTACT -->
   <div class="page a-contact">
-    <div class="a-contact-left">
+    <div class="a-contact-left a-slide-left">
       <div class="a-eyebrow">Get in touch</div>
       <div class="a-h2" style="font-size:22px">Visit Our Studio</div>
       <div class="a-contact-item"><span class="a-contact-label">Address</span><span class="a-contact-val">12 Artisan Lane, Banjara Hills, Hyderabad</span></div>
@@ -1232,7 +2397,7 @@
       <div class="a-contact-item"><span class="a-contact-label">Email</span><span class="a-contact-val">hello@lamaison.in</span></div>
       <div class="a-contact-item"><span class="a-contact-label">Web</span><span class="a-contact-val">www.lamaison.in</span></div>
     </div>
-    <div class="a-contact-right">
+    <div class="a-contact-right a-slide-right">
       <div>
         <div class="a-h2">Let's Design<br>Your Space</div>
         <p>Schedule a complimentary consultation with our lead designer. Walk-ins welcome — or book a private session.</p>
@@ -1254,20 +2419,20 @@
 
   <!-- COVER — Swiss grid -->
   <div class="page b-cover">
-    <div class="b-cover-top">
+    <div class="b-cover-top lux-stagger">
       <span>La Maison</span>
       <span>Collection 2025 — Vol. 02</span>
     </div>
     <div class="b-cover-main">
-      <div class="b-cover-title" style="grid-row:1">Interior Furnishings</div>
-      <div class="b-cover-h1" style="grid-row:2">Catalog<br>Specification</div>
-      <div class="b-cover-sub" style="grid-row:3">A systematic reference of materials, dimensions, and pricing for residential and commercial interiors.</div>
-      <div class="b-cover-meta" style="grid-row:3">Edition B<br>Rev. 2025.06<br>42 Products</div>
+      <div class="b-cover-title lux-rise" style="grid-row:1">Interior Furnishings</div>
+      <div class="b-cover-h1 lux-rise" style="grid-row:2">Catalog<br>Specification</div>
+      <div class="b-cover-sub lux-rise" style="grid-row:3">A systematic reference of materials, dimensions, and pricing for residential and commercial interiors.</div>
+      <div class="b-cover-meta lux-rise" style="grid-row:3">Edition B<br>Rev. 2025.06<br>42 Products</div>
       <div class="b-cover-photo">
         <img src="assets/catalog-b/cover.png" alt="Neutral living room interior" loading="eager">
       </div>
     </div>
-    <div class="b-cover-bottom">
+    <div class="b-cover-bottom lux-stagger">
       <span>Architectural Minimal</span>
       <span>01 / 10</span>
     </div>
@@ -1276,14 +2441,14 @@
 
   <!-- INDEX -->
   <div class="page b-index">
-    <div class="b-section-head"><div><span class="b-section-label">Section 01</span><span class="b-section-title">Index</span></div></div>
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 01</span><span class="b-section-title">Index</span></div></div>
     <div class="b-index-body">
       <div class="b-index-col">
         <div class="b-index-intro">
-          <p>This document catalogues the complete La Maison interior furnishings collection. All dimensions are nominal. Pricing valid through Q4 2025 unless otherwise noted.</p>
-          <p>Reference codes follow the format LM-[Category]-[Serial]. For technical enquiries, contact specifications@lamaison.in</p>
+          <p class="lux-rise">This document catalogues the complete La Maison interior furnishings collection. All dimensions are nominal. Pricing valid through Q4 2025 unless otherwise noted.</p>
+          <p class="lux-rise">Reference codes follow the format LM-[Category]-[Serial]. For technical enquiries, contact specifications@lamaison.in</p>
         </div>
-        <ul class="b-toc">
+        <ul class="b-toc lux-stagger">
           <li><span class="b-toc-num">01</span><span>Index</span><span class="b-toc-dots"></span><span class="b-toc-pg">02</span></li>
           <li><span class="b-toc-num">02</span><span>Studio Profile</span><span class="b-toc-dots"></span><span class="b-toc-pg">03</span></li>
           <li><span class="b-toc-num">03</span><span>Design Principles</span><span class="b-toc-dots"></span><span class="b-toc-pg">04</span></li>
@@ -1302,16 +2467,16 @@
 
   <!-- ABOUT -->
   <div class="page b-about">
-    <div class="b-section-head"><div><span class="b-section-label">Section 02</span><span class="b-section-title">Studio Profile</span></div></div>
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 02</span><span class="b-section-title">Studio Profile</span></div></div>
     <div class="b-about-body">
       <div class="b-about-left">
-        <p>La Maison is a Hyderabad-based interior furnishings studio operating since 2011. We design, source, and specify furniture for residential and commercial projects across India and Southeast Asia.</p>
-        <p>Our approach is systematic: every piece is documented with material composition, dimensional tolerances, and lead times before it enters the collection.</p>
+        <p class="lux-rise">La Maison is a Hyderabad-based interior furnishings studio operating since 2011. We design, source, and specify furniture for residential and commercial projects across India and Southeast Asia.</p>
+        <p class="lux-rise">Our approach is systematic: every piece is documented with material composition, dimensional tolerances, and lead times before it enters the collection.</p>
       </div>
       <div class="b-about-right">
-        <p>We work exclusively with certified artisan studios and FSC-compliant timber suppliers. Each product undergoes a three-stage quality review — prototype, production sample, and final inspection.</p>
-        <p>Trade accounts receive access to our full specification library, CAD blocks, and material swatch sets upon registration.</p>
-        <div class="b-stats">
+        <p class="lux-rise">We work exclusively with certified artisan studios and FSC-compliant timber suppliers. Each product undergoes a three-stage quality review — prototype, production sample, and final inspection.</p>
+        <p class="lux-rise">Trade accounts receive access to our full specification library, CAD blocks, and material swatch sets upon registration.</p>
+        <div class="b-stats lux-stagger">
           <div><div class="b-stat-num">14</div><div class="b-stat-label">Years</div></div>
           <div><div class="b-stat-num">800+</div><div class="b-stat-label">Projects</div></div>
           <div><div class="b-stat-num">42</div><div class="b-stat-label">Countries</div></div>
@@ -1327,9 +2492,9 @@
 
   <!-- PRINCIPLES -->
   <div class="page b-principles">
-    <div class="b-section-head"><div><span class="b-section-label">Section 03</span><span class="b-section-title">Design Principles</span></div></div>
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 03</span><span class="b-section-title">Design Principles</span></div></div>
     <div class="b-prin-grid">
-      <div class="b-prin-list">
+      <div class="b-prin-list lux-stagger">
         <div class="b-prin-item">
           <span class="b-prin-num">01</span>
           <div><div class="b-prin-title">Material honesty</div><p class="b-prin-text">Every surface reveals its origin. We do not simulate wood grain on polymer, nor apply metallic finishes to base alloys without disclosure in the specification sheet.</p></div>
@@ -1354,8 +2519,8 @@
 
   <!-- MATERIALS -->
   <div class="page b-materials">
-    <div class="b-section-head"><div><span class="b-section-label">Section 04</span><span class="b-section-title">Materials Reference</span></div></div>
-    <div class="b-mat-grid">
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 04</span><span class="b-section-title">Materials Reference</span></div></div>
+    <div class="b-mat-grid lux-stagger">
       <div class="b-mat-cell">
         <div class="b-mat-swatch" style="background:#d4c8b0"></div>
         <div class="b-mat-code">MAT-OAK-01</div>
@@ -1411,9 +2576,9 @@
 
   <!-- PRODUCTS — Seating & Tables -->
   <div class="page b-products">
-    <div class="b-section-head"><div><span class="b-section-label">Section 05</span><span class="b-section-title">Product Specifications — Seating &amp; Tables</span></div></div>
-    <div class="b-cat-row"><span>Category: Seating</span></div>
-    <div class="b-spec-grid">
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 05</span><span class="b-section-title">Product Specifications — Seating &amp; Tables</span></div></div>
+    <div class="b-cat-row lux-rise"><span>Category: Seating</span></div>
+    <div class="b-spec-grid lux-stagger">
       <div class="b-spec-item">
         <div class="b-spec-row">
           <div class="b-spec-img"><img src="assets/catalog-b/trending-sofa.png" alt="Velvet Lounge Sofa" loading="lazy"></div>
@@ -1453,9 +2618,9 @@
 
   <!-- PRODUCTS — Lighting & Storage -->
   <div class="page b-products">
-    <div class="b-section-head"><div><span class="b-section-label">Section 06</span><span class="b-section-title">Product Specifications — Lighting &amp; Storage</span></div></div>
-    <div class="b-cat-row"><span>Category: Lighting</span></div>
-    <div class="b-spec-grid">
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 06</span><span class="b-section-title">Product Specifications — Lighting &amp; Storage</span></div></div>
+    <div class="b-cat-row lux-rise"><span>Category: Lighting</span></div>
+    <div class="b-spec-grid lux-stagger">
       <div class="b-spec-item">
         <div class="b-spec-row">
           <div class="b-spec-img"><img src="assets/catalog-b/arco-lamp.png" alt="Arco Floor Lamp" loading="lazy"></div>
@@ -1489,8 +2654,8 @@
         <table class="b-spec-table"><tr><td>Material</td><td>Brushed Brass</td></tr><tr><td>Projection</td><td>12 cm from wall</td></tr><tr><td>Bulb</td><td>G9, max 25W</td></tr></table>
       </div>
     </div>
-    <div class="b-cat-row"><span>Category: Storage</span></div>
-    <div class="b-spec-grid">
+    <div class="b-cat-row lux-rise"><span>Category: Storage</span></div>
+    <div class="b-spec-grid lux-stagger">
       <div class="b-spec-item">
         <div class="b-spec-row">
           <div class="b-spec-img"><img src="assets/catalog-b/bookshelf.png" alt="Rattan Bookshelf" loading="lazy"></div>
@@ -1514,10 +2679,10 @@
 
   <!-- PROJECT INDEX -->
   <div class="page b-projects">
-    <div class="b-section-head"><div><span class="b-section-label">Section 07</span><span class="b-section-title">Project Index</span></div></div>
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 07</span><span class="b-section-title">Project Index</span></div></div>
     <table class="b-proj-table">
       <thead><tr><th>Project</th><th>Location</th><th>Scope</th><th>Year</th></tr></thead>
-      <tbody>
+      <tbody class="lux-stagger">
         <tr><td>House in Repino</td><td>Lake Como, IT</td><td><span class="meta">Full interior specification — 24 pieces</span></td><td>2024</td></tr>
         <tr><td>House in Zelenogorsk</td><td>St. Petersburg, RU</td><td><span class="meta">Living, dining, study — 18 pieces</span></td><td>2024</td></tr>
         <tr><td>Nexatech Headquarters</td><td>Mumbai, IN</td><td><span class="meta">Executive floors, reception — 42 pieces</span></td><td>2023</td></tr>
@@ -1536,10 +2701,10 @@
 
   <!-- DEALS — table -->
   <div class="page b-deals">
-    <div class="b-section-head"><div><span class="b-section-label">Section 08</span><span class="b-section-title">Promotional Pricing</span></div></div>
+    <div class="b-section-head lux-rise"><div><span class="b-section-label">Section 08</span><span class="b-section-title">Promotional Pricing</span></div></div>
     <table class="b-deal-table">
       <thead><tr><th>Product</th><th>SKU</th><th>Standard</th><th>Promo</th></tr></thead>
-      <tbody>
+      <tbody class="lux-stagger">
         <tr><td>Rattan Bookshelf</td><td>LM-ST-003</td><td><span class="strike">₹45,000</span></td><td>₹32,000 <span class="pct">−29%</span></td></tr>
         <tr><td>Woven Pendant Light</td><td>LM-FL-008</td><td><span class="strike">₹18,500</span></td><td>₹12,999 <span class="pct">−30%</span></td></tr>
         <tr><td>Ceramic Accent Chair</td><td>LM-SE-021</td><td><span class="strike">₹62,000</span></td><td>₹44,500 <span class="pct">−28%</span></td></tr>
@@ -1554,13 +2719,13 @@
 
   <!-- CONTACT — grid -->
   <div class="page b-contact">
-    <div class="b-contact-block">
+    <div class="b-contact-block lux-slide-left">
       <div class="b-contact-label">Studio</div>
       <div class="b-contact-line"><strong>Address</strong> 12 Artisan Lane, Banjara Hills, Hyderabad 500034</div>
       <div class="b-contact-line"><strong>Hours</strong> Mon–Sat, 10:00–19:00</div>
       <div class="b-contact-line"><strong>Trade</strong> trade@lamaison.in</div>
     </div>
-    <div class="b-contact-block">
+    <div class="b-contact-block lux-slide-right">
       <div class="b-contact-label">Contact &amp; Ordering</div>
       <div class="b-contact-line"><strong>Phone</strong> +91 98765 43210</div>
       <div class="b-contact-line"><strong>Email</strong> hello@lamaison.in</div>
@@ -1585,14 +2750,14 @@
     <div class="c-cover-band"></div>
     <div class="c-cover-inner">
       <div class="c-cover-left">
-        <div class="c-cover-brand">La Maison</div>
-        <div class="c-cover-title">Handcrafted<br><em>for Home</em></div>
+        <div class="c-cover-brand lux-rise">La Maison</div>
+        <div class="c-cover-title lux-rise">Handcrafted<br><em>for Home</em></div>
       </div>
       <div class="c-cover-right">
         <div class="c-cover-visual">
           <img src="assets/catalog-c/volta-lamp.png" alt="Volta table lamp in a warm interior" loading="eager">
         </div>
-        <p class="c-cover-tag">Pieces made by hand, meant to be lived with for generations.</p>
+        <p class="c-cover-tag lux-rise">Pieces made by hand, meant to be lived with for generations.</p>
       </div>
     </div>
     <div class="page-num" style="color:var(--text4)">01 / 11</div>
@@ -1601,16 +2766,16 @@
 
   <!-- ABOUT -->
   <div class="page c-about">
-    <div class="c-about-band"><span>Our Story — Est. 2011</span></div>
+    <div class="c-about-band lux-rise"><span>Our Story — Est. 2011</span></div>
     <div class="c-about-body">
       <div>
-        <h3>A studio built on slow craft</h3>
-        <p>La Maison began in a small workshop in Hyderabad with a single belief: furniture should be made slowly, by skilled hands, from materials that age with grace.</p>
-        <p>Today we partner with twelve artisan studios across India, Portugal, and Italy — each chosen for a specific craft tradition.</p>
+        <h3 class="lux-rise">A studio built on slow craft</h3>
+        <p class="lux-rise">La Maison began in a small workshop in Hyderabad with a single belief: furniture should be made slowly, by skilled hands, from materials that age with grace.</p>
+        <p class="lux-rise">Today we partner with twelve artisan studios across India, Portugal, and Italy — each chosen for a specific craft tradition.</p>
       </div>
       <div>
-        <p>We don't follow seasons. We follow materials — what the forest offers, what the kiln produces, what the loom weaves. Every piece in this catalog was made to be passed down, not replaced.</p>
-        <div class="c-about-stats">
+        <p class="lux-rise">We don't follow seasons. We follow materials — what the forest offers, what the kiln produces, what the loom weaves. Every piece in this catalog was made to be passed down, not replaced.</p>
+        <div class="c-about-stats lux-stagger">
           <div><div class="c-about-stat-num">12</div><div class="c-about-stat-label">Artisan Partners</div></div>
           <div><div class="c-about-stat-num">100%</div><div class="c-about-stat-label">Hand-finished</div></div>
           <div><div class="c-about-stat-num">FSC</div><div class="c-about-stat-label">Certified Wood</div></div>
@@ -1626,11 +2791,11 @@
 
   <!-- MAKING PROCESS -->
   <div class="page c-process">
-    <div class="c-process-band">
+    <div class="c-process-band lux-rise">
       <h3>How Every Piece Is Made</h3>
       <p>From raw material to your home — four stages of intentional craft.</p>
     </div>
-    <div class="c-process-steps">
+    <div class="c-process-steps lux-stagger">
       <div class="c-step">
         <span class="c-step-num">1</span>
         <div><div class="c-step-title">Material selection</div><p class="c-step-text">We visit forests, quarries, and weaving cooperatives personally. Only batches that meet our grain, colour, and structural standards enter production.</p></div>
@@ -1654,8 +2819,8 @@
 
   <!-- PRODUCTS — staggered -->
   <div class="page c-products">
-    <div class="c-section-band">Curated Collection — Spring 2025</div>
-    <div class="c-stagger">
+    <div class="c-section-band lux-rise">Curated Collection — Spring 2025</div>
+    <div class="c-stagger lux-stagger">
       <div class="c-card">
         <div class="c-card-img" style="height:240px"><img src="assets/catalog-c/arco-lamp.png" alt="Arco Floor Lamp" loading="lazy"></div>
         <div class="c-card-body"><div class="c-card-name">Arco Floor Lamp</div><div class="c-card-desc">Brushed brass with an arched silhouette that casts warm light across the room.</div><div class="c-card-price">₹24,500</div></div>
@@ -1683,8 +2848,8 @@
 
   <!-- PRODUCTS 2 — Lighting & Accents -->
   <div class="page c-products">
-    <div class="c-section-band">Lighting &amp; Home Accents</div>
-    <div class="c-stagger">
+    <div class="c-section-band lux-rise">Lighting &amp; Home Accents</div>
+    <div class="c-stagger lux-stagger">
       <div class="c-card">
         <div class="c-card-img" style="height:220px"><img src="assets/catalog-c/volta-lamp.png" alt="Volta Table Lamp" loading="lazy"></div>
         <div class="c-card-body"><div class="c-card-name">Volta Table Lamp</div><div class="c-card-desc">Hand-blown glass shade, brushed brass base. Warm 2700K glow, dimmable by touch.</div><div class="c-card-price">₹16,800</div></div>
@@ -1708,9 +2873,9 @@
 
   <!-- ARTISANS -->
   <div class="page c-artisans">
-    <div class="c-section-title">The Hands Behind the Work</div>
-    <div class="c-section-sub">Meet the makers we trust with every piece.</div>
-    <div class="c-artisan-grid">
+    <div class="c-section-title lux-rise">The Hands Behind the Work</div>
+    <div class="c-section-sub lux-rise">Meet the makers we trust with every piece.</div>
+    <div class="c-artisan-grid lux-stagger">
       <div class="c-artisan">
         <div class="c-artisan-name">Ravi Menon</div>
         <div class="c-artisan-role">Master Weaver — Kerala</div>
@@ -1738,9 +2903,9 @@
 
   <!-- MATERIALS -->
   <div class="page c-materials">
-    <div class="c-section-title">Materials We Trust</div>
-    <div class="c-section-sub">Four foundations of every La Maison piece.</div>
-    <div class="c-mat-cols">
+    <div class="c-section-title lux-rise">Materials We Trust</div>
+    <div class="c-section-sub lux-rise">Four foundations of every La Maison piece.</div>
+    <div class="c-mat-cols lux-stagger">
       <div class="c-mat-item">
         <div class="c-mat-name">European White Oak</div>
         <p class="c-mat-desc">Kiln-dried, FSC-certified. We use only quarter-sawn boards for structural pieces — tighter grain, less movement over decades.</p>
@@ -1764,14 +2929,14 @@
 
   <!-- DEALS -->
   <div class="page c-deals">
-    <div class="c-deal-band">
+    <div class="c-deal-band lux-rise">
       <h3>Seasonal Offers</h3>
       <p>Our most-loved pieces, thoughtfully reduced.</p>
     </div>
     <div class="c-deal-visual">
       <img src="assets/catalog-c/deals.jpg" alt="Curated furniture collection" loading="lazy">
     </div>
-    <div class="c-deal-list">
+    <div class="c-deal-list lux-stagger">
       <div class="c-deal-item"><span class="c-deal-name">Rattan Bookshelf</span><span class="c-deal-old">₹45,000</span><span class="c-deal-new">₹32,000</span></div>
       <div class="c-deal-item"><span class="c-deal-name">Woven Pendant Light</span><span class="c-deal-old">₹18,500</span><span class="c-deal-new">₹12,999</span></div>
       <div class="c-deal-item"><span class="c-deal-name">Ceramic Accent Chair</span><span class="c-deal-old">₹62,000</span><span class="c-deal-new">₹44,500</span></div>
@@ -1784,10 +2949,10 @@
   <!-- QUOTE -->
   <div class="page c-quote">
     <div class="c-quote-bg"><img src="assets/catalog-c/quote-band.jpg" alt="" loading="lazy"></div>
-    <div class="c-quote-mark">"</div>
+    <div class="c-quote-mark lux-rise">"</div>
     <div>
-      <p class="c-quote-text">We source only sustainable materials and work with artisan studios to ensure each product is made to last generations — not just seasons.</p>
-      <div class="c-quote-attr">Founding Principle, La Maison</div>
+      <p class="c-quote-text lux-rise">We source only sustainable materials and work with artisan studios to ensure each product is made to last generations — not just seasons.</p>
+      <div class="c-quote-attr lux-rise">Founding Principle, La Maison</div>
     </div>
     <div class="page-num" style="color:var(--text4)">09 / 11</div>
   </div>
@@ -1795,9 +2960,9 @@
 
   <!-- TESTIMONIALS -->
   <div class="page c-testimonials">
-    <div class="c-section-title">Stories from Home</div>
-    <div class="c-section-sub">What our clients tell us, years after delivery.</div>
-    <div class="c-testi-grid">
+    <div class="c-section-title lux-rise">Stories from Home</div>
+    <div class="c-section-sub lux-rise">What our clients tell us, years after delivery.</div>
+    <div class="c-testi-grid lux-stagger">
       <div class="c-testi">
         <p class="c-testi-text">"The rattan bookshelf has moved with us twice. It looks better now than the day it arrived — the wood has darkened beautifully."</p>
         <div class="c-testi-author">Priya Sharma</div>
@@ -1821,7 +2986,7 @@
   <!-- CONTACT -->
   <div class="page c-contact">
     <div class="c-contact-grid">
-      <div>
+      <div class="lux-slide-left">
         <h3>Come Visit Us</h3>
         <p class="c-contact-intro">Our studio is open to walk-ins and private consultations alike. We'd love to show you the collection in person.</p>
         <div class="c-contact-detail">
@@ -1831,7 +2996,7 @@
           www.lamaison.in
         </div>
       </div>
-      <div class="c-contact-pull">"Every piece we make carries the mark of the hands that shaped it."</div>
+      <div class="c-contact-pull lux-rise">"Every piece we make carries the mark of the hands that shaped it."</div>
       <div class="c-contact-visual">
         <img src="assets/catalog-c/portfolio-1.jpg" alt="La Maison interior project" loading="lazy">
       </div>
@@ -1853,13 +3018,13 @@
   <div class="page d-cover">
     <div class="d-cover-hero">
       <img src="assets/catalog-d/cover.png" alt="Luxury living room interior" loading="eager">
-      <div class="d-cover-panel">
+      <div class="d-cover-panel lux-slide-right">
         <div class="d-cover-eyebrow">La Maison — 2025</div>
         <div class="d-cover-title">The Art of<br>Living Well</div>
         <p class="d-cover-sub">A curated selection of timeless interior pieces for the discerning home.</p>
       </div>
     </div>
-    <div class="d-cover-footer">
+    <div class="d-cover-footer lux-stagger">
       <span class="d-cover-meta">Modern Luxury Edition</span>
       <span class="d-cover-meta">Collection 2025</span>
     </div>
@@ -1872,7 +3037,7 @@
     <div class="d-editorial-hero">
       <img src="assets/catalog-d/quote-full.jpg" alt="Editorial interior spread" loading="lazy">
     </div>
-    <div class="d-editorial-panel">
+    <div class="d-editorial-panel lux-slide-left">
       <div class="d-cover-eyebrow">Editor's Note</div>
       <div class="d-cover-title">Designed to<br>Be Kept</div>
       <p>This collection represents our conviction that luxury is not excess — it is restraint. Each piece was chosen for permanence, proportion, and the quiet confidence of excellent materials.</p>
@@ -1886,9 +3051,9 @@
     <div class="d-index-hero">
       <img src="assets/catalog-d/spotlight-sofa.png" alt="Velvet lounge sofa" loading="lazy">
     </div>
-    <div class="d-index-panel">
+    <div class="d-index-panel lux-slide-right">
       <h3>In This Edition</h3>
-      <ul class="d-index-list">
+      <ul class="d-index-list lux-stagger">
         <li><span>Cover — The Art of Living Well</span><span>01</span></li>
         <li><span>Editor's Note</span><span>02</span></li>
         <li><span>The La Maison Story</span><span>04</span></li>
@@ -1911,7 +3076,7 @@
     <div class="d-story-hero">
       <img src="assets/catalog-d/about.jpg" alt="La Maison studio" loading="lazy">
     </div>
-    <div class="d-story-panel">
+    <div class="d-story-panel lux-slide-right">
       <h3>The La Maison Story</h3>
       <p>Founded in 2011, La Maison curates interior furnishings for clients who value permanence over trend. Our studio in Hyderabad serves collectors, architects, and homeowners across 42 countries — each relationship built on the belief that a well-made room outlasts every fashion cycle.</p>
     </div>
@@ -1924,7 +3089,7 @@
     <div class="d-product-hero">
       <img src="assets/catalog-d/arco-lamp.png" alt="Arco Floor Lamp" loading="lazy">
     </div>
-    <div class="d-product-panel">
+    <div class="d-product-panel lux-slide-left">
       <div class="d-product-info">
         <div class="d-product-name">Arco Floor Lamp</div>
         <div class="d-product-cat">Lighting · Brass</div>
@@ -1941,7 +3106,7 @@
     <div class="d-product-hero">
       <img src="assets/catalog-d/spotlight-sofa.png" alt="Velvet Lounge Sofa" loading="lazy">
     </div>
-    <div class="d-product-panel">
+    <div class="d-product-panel lux-slide-left">
       <div class="d-product-info">
         <div class="d-product-name">Velvet Lounge Sofa</div>
         <div class="d-product-cat">Seating · Bouclé</div>
@@ -1958,7 +3123,7 @@
     <div class="d-product-hero">
       <img src="assets/catalog-d/marble-table.png" alt="Marble Side Table" loading="lazy">
     </div>
-    <div class="d-product-panel">
+    <div class="d-product-panel lux-slide-left">
       <div class="d-product-info">
         <div class="d-product-name">Marble Side Table</div>
         <div class="d-product-cat">Tables · Carrara</div>
@@ -1975,7 +3140,7 @@
     <div class="d-product-hero">
       <img src="assets/catalog-d/bookshelf.png" alt="Rattan Bookshelf" loading="lazy">
     </div>
-    <div class="d-product-panel">
+    <div class="d-product-panel lux-slide-left">
       <div class="d-product-info">
         <div class="d-product-name">Rattan Bookshelf</div>
         <div class="d-product-cat">Storage · Natural</div>
@@ -1992,7 +3157,7 @@
     <div class="d-feature-hero">
       <img src="assets/catalog-d/portfolio-1.jpg" alt="House in Repino — lakeside interior" loading="lazy">
     </div>
-    <div class="d-feature-caption">
+    <div class="d-feature-caption lux-rise">
       <div class="d-feature-tag">Portfolio — Lake Como, 2024</div>
       <h3>House in Repino</h3>
       <p>A lakeside retreat designed around stillness. Warm oak, raw linen, and twenty-four La Maison pieces chosen for their ability to age in silence.</p>
@@ -2006,12 +3171,14 @@
     <div class="d-deals-hero">
       <img src="assets/catalog-d/deals.jpg" alt="Curated furniture collection" loading="lazy">
     </div>
-    <div class="d-deals-panel">
+    <div class="d-deals-panel lux-slide-right">
       <h3>Exclusive Offers</h3>
+      <div class="lux-stagger">
       <div class="d-deal-line"><span class="name">Rattan Bookshelf</span><span><span class="old">₹45k</span><span class="price">₹32,000</span></span></div>
       <div class="d-deal-line"><span class="name">Woven Pendant</span><span><span class="old">₹18.5k</span><span class="price">₹12,999</span></span></div>
       <div class="d-deal-line"><span class="name">Accent Chair</span><span><span class="old">₹62k</span><span class="price">₹44,500</span></span></div>
       <div class="d-deal-line"><span class="name">Marble Table</span><span><span class="old">₹38k</span><span class="price">₹28,500</span></span></div>
+      </div>
     </div>
     <div class="page-num">10 / 12</div>
   </div>
@@ -2022,7 +3189,7 @@
     <div class="d-testimonial-hero">
       <img src="assets/catalog-d/como-chair.png" alt="Como lounge chair in situ" loading="lazy">
     </div>
-    <div class="d-testimonial-panel">
+    <div class="d-testimonial-panel lux-rise">
       <p class="d-testimonial-quote">"Our home finally feels complete. The design team understood the brief on the first call — truly rare in this industry."</p>
       <div class="d-testimonial-author"><strong>Priya Sharma</strong> — Architect, Bengaluru</div>
     </div>
@@ -2035,7 +3202,7 @@
     <div class="d-contact-hero">
       <img src="assets/catalog-d/contact.jpg" alt="La Maison studio interior" loading="lazy">
     </div>
-    <div class="d-contact-panel">
+    <div class="d-contact-panel lux-slide-left">
       <div class="d-cta-eyebrow">Complimentary for first-time clients</div>
       <h3>Visit &amp; Consult</h3>
       <p style="font-size:11px;color:var(--text3);line-height:1.75;margin-bottom:16px">Schedule a private session with our lead designer. Walk-ins welcome Monday – Saturday, 10am – 7pm.</p>
@@ -2049,16 +3216,225 @@
 
 </div>
 </div>
+</div>
+
 
 <script>
+  var NAV_CONFIG = {
+    '2030': { rootId: 'cat-2030', sectionSel: '[data-section]' },
+    'e':    { rootId: 'cat-e',    sectionSel: '.e-page' },
+    'a':    { rootId: 'cat-a',    sectionSel: '.page' },
+    'b':    { rootId: 'cat-b',    sectionSel: '.page' },
+    'c':    { rootId: 'cat-c',    sectionSel: '.page' },
+    'd':    { rootId: 'cat-d',    sectionSel: '.page' }
+  };
+  var NAV_LABELS = {
+    '2030': ['Cover','Intro','Living','Bathroom','Kitchen','Bedroom','Office','Services','Contact'],
+    'e':    ['Cover','Intro','Services','Experience','Plans','Team','Testimonial','Contact'],
+    'a':    ['Cover','Index','About','Quote','Products','Spotlight','Lighting','Editorial','Deals','Inquiry','Reviews','Contact'],
+    'b':    ['Cover','Index','About','Principles','Materials','Products','Gallery','Projects','Deals','Contact'],
+    'c':    ['Cover','About','Process','Products','Seating','Artisans','Materials','Deals','Quote','Reviews','Contact'],
+    'd':    ['Cover','Editorial','Index','Story','Sofa','Table','Chair','Lamp','Feature','Deals','Review','Contact']
+  };
+  var activeCatalog = '2030';
+  var catalogNavEl = document.querySelector('.catalog-nav');
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function isCatalogActive(cat) {
+    if (cat === '2030') return document.getElementById('cat-2030').classList.contains('active');
+    if (cat === 'e') return document.getElementById('cat-e').classList.contains('active');
+    var lr = document.getElementById('luxury-root');
+    var cw = document.getElementById('cat-' + cat);
+    return lr && lr.classList.contains('active') && cw && cw.classList.contains('active');
+  }
+
+  function getCatalogSections(cat) {
+    var cfg = NAV_CONFIG[cat];
+    if (!cfg) return [];
+    var root = document.getElementById(cfg.rootId);
+    return root ? Array.prototype.slice.call(root.querySelectorAll(cfg.sectionSel)) : [];
+  }
+
+  function buildCatalogNav(cat) {
+    activeCatalog = cat;
+    var sections = getCatalogSections(cat);
+    var labels = NAV_LABELS[cat] || [];
+    catalogNavEl.innerHTML = '';
+    sections.forEach(function (sec, i) {
+      if (!sec.id) sec.id = cat + '-sec-' + i;
+      var a = document.createElement('a');
+      a.href = '#' + sec.id;
+      a.dataset.section = sec.id;
+      a.title = labels[i] || ('Section ' + (i + 1));
+      a.textContent = labels[i] || '';
+      if (i === 0) a.classList.add('active');
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        var target = document.getElementById(sec.id);
+        if (target) target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+      });
+      catalogNavEl.appendChild(a);
+    });
+    updateCatalogNav();
+  }
+
+  function updateCatalogNav() {
+    if (!isCatalogActive(activeCatalog)) return;
+    var sections = getCatalogSections(activeCatalog);
+    var navLinks = catalogNavEl.querySelectorAll('a');
+    if (!sections.length || !navLinks.length) return;
+    var current = sections[0].id;
+    sections.forEach(function (sec) {
+      if (sec.getBoundingClientRect().top <= window.innerHeight * 0.45) current = sec.id;
+    });
+    navLinks.forEach(function (link) {
+      link.classList.toggle('active', link.dataset.section === current);
+    });
+  }
+
+  window.updateCatalogNav = updateCatalogNav;
+
   function setCatalog(cat) {
-    document.querySelectorAll('.catalog-wrap').forEach(w => w.classList.remove('active'));
-    document.getElementById('cat-' + cat).classList.add('active');
-    document.querySelectorAll('.cat-btn').forEach(btn => {
+    var is2030 = cat === '2030';
+    var isArch = cat === 'e';
+    var luxuryCats = ['a', 'b', 'c', 'd'];
+    document.getElementById('cat-2030').classList.toggle('active', is2030);
+    document.getElementById('cat-e').classList.toggle('active', isArch);
+    document.getElementById('luxury-root').classList.toggle('active', luxuryCats.indexOf(cat) !== -1);
+    if (luxuryCats.indexOf(cat) !== -1) {
+      document.querySelectorAll('#luxury-root .catalog-wrap').forEach(function(w) {
+        w.classList.remove('active');
+      });
+      var target = document.getElementById('cat-' + cat);
+      if (target) target.classList.add('active');
+    }
+    document.body.classList.toggle('edition-2030', is2030);
+    document.body.classList.toggle('edition-arch', isArch);
+    document.body.classList.toggle('edition-luxury', luxuryCats.indexOf(cat) !== -1);
+    document.getElementById('progressBar').hidden = !is2030;
+    document.querySelectorAll('.switcher .cat-btn').forEach(function(btn) {
       btn.classList.toggle('active', btn.getAttribute('data-cat') === cat);
     });
+    buildCatalogNav(cat);
+    if (isArch && window.initArchCatalog) window.initArchCatalog();
+    if (luxuryCats.indexOf(cat) !== -1 && window.initLuxuryCatalog) window.initLuxuryCatalog(cat);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  buildCatalogNav('2030');
+</script>
+
+<script>
+(function () {
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root2030 = document.getElementById('cat-2030');
+
+  /* Scroll progress */
+  const progressBar = document.getElementById('progressBar');
+  function updateProgress() {
+    if (!root2030.classList.contains('active')) return;
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    progressBar.style.width = docHeight > 0 ? (scrollTop / docHeight * 100) + '%' : '0%';
+  }
+
+  /* Intersection Observer — reveals */
+  const revealEls = root2030.querySelectorAll('.reveal, .reveal-left, .stagger, .terra-block');
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  revealEls.forEach(el => revealObserver.observe(el));
+
+  /* Parallax on hero images */
+  const parallaxEls = root2030.querySelectorAll('.parallax');
+  function updateParallax() {
+    if (!root2030.classList.contains('active')) return;
+    if (prefersReduced) return;
+    parallaxEls.forEach(img => {
+      const wrap = img.closest('.parallax-wrap');
+      if (!wrap) return;
+      const rect = wrap.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const viewCenter = window.innerHeight / 2;
+      const offset = (center - viewCenter) * parseFloat(img.dataset.speed || 0.12);
+      img.style.transform = 'translateY(' + offset + 'px)';
+    });
+  }
+
+  let ticking = false;
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        updateProgress();
+        updateParallax();
+        if (window.updateCatalogNav) window.updateCatalogNav();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  updateProgress();
+  updateParallax();
+  if (window.updateCatalogNav) window.updateCatalogNav();
+})();
+</script>
+
+<script>
+(function () {
+  var archObserved = false;
+  window.initArchCatalog = function () {
+    var root = document.getElementById('cat-e');
+    if (!root || archObserved) return;
+    archObserved = true;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var targets = root.querySelectorAll('.e-arch, .e-arch-rise, .e-rise, .e-slide-left, .e-slide-right, .e-stagger, .e-bar-item, .e-team-member');
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
+    targets.forEach(function (el) { obs.observe(el); });
+    if (reduced) targets.forEach(function (el) { el.classList.add('is-visible'); });
+  };
+})();
+</script>
+
+<script>
+(function () {
+  var luxuryInited = {};
+  var luxAnimSel = '.lux-rise, .lux-slide-left, .lux-slide-right, .lux-stagger, .a-rise, .a-rise-skew, .a-rise-skew-2, .a-rise-skew-3, .a-slide-left, .a-slide-right, .a-fade-soft, .a-stagger';
+
+  window.initLuxuryCatalog = function (cat) {
+    if (luxuryInited[cat]) return;
+    var root = document.getElementById('cat-' + cat);
+    if (!root) return;
+    luxuryInited[cat] = true;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var targets = root.querySelectorAll(luxAnimSel);
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    targets.forEach(function (el) { obs.observe(el); });
+    if (reduced) targets.forEach(function (el) { el.classList.add('is-visible'); });
+  };
+})();
 </script>
 </body>
 </html>
+
